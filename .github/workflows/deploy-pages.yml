@@ -1,8 +1,11 @@
-name: Deploy dashboard to GitHub Pages
+name: Deploy QuakeScope to GitHub Pages
 
 on:
   push:
     branches: [main]
+  schedule:
+    # Refresh live intelligence data every 6 hours
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -15,25 +18,49 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  build-and-test:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          enablement: true
+          python-version: "3.11"
+          cache: "pip"
 
-      - name: Upload site artifact
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run automated test suite
+        run: |
+          python -m unittest discover -s tests -v
+
+      - name: Build QuakeScope intelligence platform
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python data_pipeline.py --output-dir _site
+
+      - name: Validate build output
+        run: |
+          python data_pipeline.py --validate-only
+
+      - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: _site
 
+  deploy:
+    needs: build-and-test
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4

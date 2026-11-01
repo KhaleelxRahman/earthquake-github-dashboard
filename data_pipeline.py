@@ -1,277 +1,278 @@
-"""Fetch live earthquake and GitHub repository data, then build a dashboard."""
+"""QuakeScope — Global Earthquake Intelligence Data Pipeline.
 
+Fetches global seismic data from the USGS and repository metrics from GitHub,
+validates incoming telemetry, computes analytics distributions, and atomically
+generates the QuakeScope production dashboard.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
 import logging
+import os
+import shutil
+import sys
+from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Dict, List, Optional, Tuple
 
-import pandas as pd
-import plotly.express as px
-import plotly.graph_objects as go
-import plotly.io as pio
-import requests
-
+import dashboard_template
+import quake_service
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(levelname)s: %(message)s",
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
 )
+logger = logging.getLogger("data_pipeline")
 
-USGS_URL = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson"
-GITHUB_URL = "https://api.github.com/search/repositories"
-REQUEST_TIMEOUT_SECONDS = 20
-OUTPUT_FILE = Path("index.html")
-
-EARTHQUAKE_COLUMNS = [
-    "place",
-    "magnitude",
-    "time",
-    "latitude",
-    "longitude",
-    "depth",
-    "url",
-]
-REPOSITORY_COLUMNS = ["name", "stars", "description", "url"]
+BASE_DIR = Path(__file__).parent
+DATA_DIR = BASE_DIR / "data"
+CACHE_FILE = DATA_DIR / "cache_data.json"
+DEFAULT_OUTPUT_FILE = BASE_DIR / "index.html"
+SITE_DIR = BASE_DIR / "_site"
 
 
-def get_json(url: str, params: dict[str, Any] | None = None) -> dict[str, Any] | None:
-    """Request JSON from an API and report network or response errors."""
-    headers = {"User-Agent": "Live-Data-Pipeline-Dashboard"}
+def load_cached_data() -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]], Dict[str, Any]]:
+    """Load the verified fallback baseline snapshot from cache."""
+    if not CACHE_FILE.exists():
+        logger.warning("Cache file %s does not exist.", CACHE_FILE)
+        return [], [], {}
+
     try:
-        response = requests.get(
-            url,
-            params=params,
-            headers=headers,
-            timeout=REQUEST_TIMEOUT_SECONDS,
+        data = json.loads(CACHE_FILE.read_text(encoding="utf-8"))
+        earthquakes = data.get("earthquakes", [])
+        repositories = data.get("repositories", [])
+        freshness = {
+            "cached_at": data.get("cached_at"),
+            "source": data.get("source", "Offline Cache Snapshot"),
+            "is_fallback": True,
+        }
+        logger.info(
+            "Loaded cached baseline with %d earthquakes and %d repositories.",
+            len(earthquakes),
+            len(repositories),
         )
-        response.raise_for_status()
-        data = response.json()
-    except requests.RequestException as error:
-        logging.error("Request to %s failed: %s", url, error)
-        return None
-    except ValueError as error:
-        logging.error("The response from %s was not valid JSON: %s", url, error)
-        return None
-
-    if not isinstance(data, dict):
-        logging.error("The response from %s did not contain a JSON object.", url)
-        return None
-    return data
+        return earthquakes, repositories, freshness
+    except Exception as exc:
+        logger.error("Failed to read cache file %s: %s", CACHE_FILE, exc)
+        return [], [], {}
 
 
-def fetch_earthquakes() -> pd.DataFrame:
-    """Fetch M4.5+ earthquakes from the USGS past-week GeoJSON feed."""
-    data = get_json(USGS_URL)
-    if data is None:
-        return pd.DataFrame(columns=EARTHQUAKE_COLUMNS)
+def save_cached_data(earthquakes: List[Dict[str, Any]], repositories: List[Dict[str, Any]]) -> None:
+    """Save the latest verified dataset to the cache file."""
+    if not earthquakes and not repositories:
+        return
 
-    features = data.get("features")
-    if not isinstance(features, list):
-        logging.error("The USGS response is missing its features list.")
-        return pd.DataFrame(columns=EARTHQUAKE_COLUMNS)
-
-    rows: list[dict[str, Any]] = []
-    for feature in features:
-        if not isinstance(feature, dict):
-            logging.warning("Skipping an earthquake entry that is not an object.")
-            continue
-
-        properties = feature.get("properties")
-        geometry = feature.get("geometry")
-        coordinates = geometry.get("coordinates") if isinstance(geometry, dict) else None
-        if not isinstance(properties, dict) or not isinstance(coordinates, list) or len(coordinates) < 3:
-            logging.warning("Skipping an earthquake entry with missing properties or coordinates.")
-            continue
-
-        try:
-            longitude, latitude, depth = coordinates[:3]
-            magnitude = properties.get("mag")
-            timestamp = properties.get("time")
-            if magnitude is None or timestamp is None:
-                raise ValueError("magnitude or time is missing")
-
-            rows.append(
-                {
-                    "place": properties.get("place") or "Unknown location",
-                    "magnitude": float(magnitude),
-                    "time": pd.to_datetime(timestamp, unit="ms", utc=True, errors="raise"),
-                    "latitude": float(latitude),
-                    "longitude": float(longitude),
-                    "depth": float(depth),
-                    "url": properties.get("url") or "",
-                }
-            )
-        except (TypeError, ValueError, OverflowError) as error:
-            logging.warning("Skipping an earthquake entry with invalid data: %s", error)
-
-    if not rows:
-        logging.warning("The USGS feed did not contain any usable earthquake entries.")
-    return pd.DataFrame(rows, columns=EARTHQUAKE_COLUMNS)
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    payload = {
+        "cached_at": datetime.now(timezone.utc).isoformat(),
+        "source": "USGS GeoJSON & GitHub REST API Live Ingestion",
+        "earthquakes": earthquakes,
+        "repositories": repositories,
+    }
+    try:
+        CACHE_FILE.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        logger.info("Persisted updated snapshot to cache (%s).", CACHE_FILE)
+    except Exception as exc:
+        logger.warning("Could not persist snapshot to cache: %s", exc)
 
 
-def fetch_top_repositories() -> pd.DataFrame:
-    """Fetch the ten most-starred Python repositories from GitHub."""
-    data = get_json(
-        GITHUB_URL,
-        params={
-            "q": "language:python",
-            "sort": "stars",
-            "order": "desc",
-            "per_page": 10,
-        },
+def validate_output_html(file_path: Path) -> bool:
+    """Validate that the generated HTML file is non-empty, well-formed, and contains required data."""
+    if not file_path.exists():
+        logger.error("Validation failed: file %s does not exist.", file_path)
+        return False
+
+    size = file_path.stat().st_size
+    if size < 20000:
+        logger.error("Validation failed: file size %d bytes is below 20KB threshold.", size)
+        return False
+
+    try:
+        content = file_path.read_text(encoding="utf-8")
+        if "</html>" not in content or "QuakeScope" not in content:
+            logger.error("Validation failed: missing closing HTML tags or product marker.")
+            return False
+        if "quakescope-data" not in content:
+            logger.error("Validation failed: missing embedded quakescope-data payload.")
+            return False
+        return True
+    except Exception as exc:
+        logger.error("Validation failed due to read error: %s", exc)
+        return False
+
+
+def atomic_write_dashboard(html_content: str, destination_path: Path) -> None:
+    """Write dashboard HTML atomically to prevent corrupting an existing working dashboard."""
+    destination_path.parent.mkdir(parents=True, exist_ok=True)
+    tmp_path = destination_path.with_suffix(".html.tmp")
+
+    try:
+        tmp_path.write_text(html_content, encoding="utf-8")
+        if not validate_output_html(tmp_path):
+            raise ValueError(f"Temporary output failed integrity validation: {tmp_path}")
+
+        # Atomic replacement
+        if destination_path.exists():
+            # Create a backup of the previous good file
+            bak_path = destination_path.with_suffix(".html.bak")
+            try:
+                shutil.copy2(destination_path, bak_path)
+            except Exception:
+                pass
+
+        # Atomic rename
+        os.replace(tmp_path, destination_path)
+        logger.info("Atomically updated dashboard at %s (%d bytes).", destination_path, destination_path.stat().st_size)
+
+    except Exception as exc:
+        if tmp_path.exists():
+            tmp_path.unlink(missing_ok=True)
+        raise RuntimeError(f"Atomic write to {destination_path} failed: {exc}") from exc
+
+
+def run_pipeline(
+    feed_key: str = "4.5_week",
+    output_dir: Optional[Path] = None,
+    github_token: Optional[str] = None,
+    offline_mode: bool = False,
+) -> int:
+    """Execute the full data pipeline and generate the dashboard."""
+    logger.info("Initializing QuakeScope pipeline execution.")
+    token = github_token or os.environ.get("GITHUB_TOKEN")
+
+    earthquakes: List[Dict[str, Any]] = []
+    repositories: List[Dict[str, Any]] = []
+    usgs_status = "live"
+    github_status = "live"
+
+    if offline_mode:
+        logger.info("Offline mode requested; skipping network ingestion.")
+        cached_eq, cached_repo, _ = load_cached_data()
+        earthquakes = cached_eq
+        repositories = cached_repo
+        usgs_status = "offline_cache"
+        github_status = "offline_cache"
+    else:
+        # Ingest USGS
+        raw_usgs, usgs_err = quake_service.fetch_earthquakes_raw(feed_key)
+        if raw_usgs and usgs_err == "OK":
+            earthquakes = quake_service.parse_earthquake_features(raw_usgs)
+        else:
+            logger.warning("USGS live fetch failed (%s); falling back to cached baseline.", usgs_err)
+            cached_eq, _, _ = load_cached_data()
+            earthquakes = cached_eq
+            usgs_status = f"fallback ({usgs_err})"
+
+        # Ingest GitHub
+        raw_github, github_err = quake_service.fetch_top_repositories_raw(token)
+        if raw_github and github_err == "OK":
+            repositories = quake_service.parse_repository_items(raw_github)
+        else:
+            logger.warning("GitHub live fetch failed (%s); falling back to cached baseline.", github_err)
+            _, cached_repo, _ = load_cached_data()
+            repositories = cached_repo
+            github_status = f"fallback ({github_err})"
+
+        # If live ingestion succeeded, update cache
+        if usgs_status == "live" and github_status == "live" and earthquakes and repositories:
+            save_cached_data(earthquakes, repositories)
+
+    # Protection against empty pipeline output (DEF-01)
+    if not earthquakes and not repositories:
+        cached_eq, cached_repo, _ = load_cached_data()
+        if cached_eq or cached_repo:
+            logger.warning("Using cached baseline to safeguard against empty dashboard.")
+            earthquakes = cached_eq
+            repositories = cached_repo
+            usgs_status = "cache_emergency"
+            github_status = "cache_emergency"
+        else:
+            logger.critical("No earthquake or repository data available. Aborting build to protect dashboard.")
+            return 1
+
+    # Analytics calculation
+    analytics = quake_service.calculate_analytics(earthquakes)
+
+    # Freshness metadata
+    freshness = {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "usgs_feed": feed_key,
+        "usgs_status": usgs_status,
+        "github_status": github_status,
+        "earthquake_count": len(earthquakes),
+        "repository_count": len(repositories),
+    }
+
+    # Render HTML template
+    logger.info("Generating production HTML with %d events and %d repositories.", len(earthquakes), len(repositories))
+    html_output = dashboard_template.generate_dashboard_html(
+        earthquakes=earthquakes,
+        repositories=repositories,
+        analytics=analytics,
+        freshness=freshness,
     )
-    if data is None:
-        return pd.DataFrame(columns=REPOSITORY_COLUMNS)
 
-    repositories = data.get("items")
-    if not isinstance(repositories, list):
-        logging.error("The GitHub response is missing its items list.")
-        return pd.DataFrame(columns=REPOSITORY_COLUMNS)
+    # Determine targets
+    target_files = [DEFAULT_OUTPUT_FILE]
+    if output_dir:
+        target_files.append(output_dir / "index.html")
+    else:
+        # Also mirror into _site/ if _site exists or is used for CI
+        target_files.append(SITE_DIR / "index.html")
 
-    rows: list[dict[str, Any]] = []
-    for repository in repositories:
-        if not isinstance(repository, dict):
-            logging.warning("Skipping a repository entry that is not an object.")
-            continue
-        name = repository.get("full_name")
-        stars = repository.get("stargazers_count")
-        if not name or stars is None:
-            logging.warning("Skipping a repository entry missing its name or star count.")
-            continue
-        try:
-            rows.append(
-                {
-                    "name": str(name),
-                    "stars": int(stars),
-                    "description": repository.get("description") or "No description provided.",
-                    "url": repository.get("html_url") or "",
-                }
-            )
-        except (TypeError, ValueError) as error:
-            logging.warning("Skipping a repository entry with invalid data: %s", error)
+    for target in target_files:
+        atomic_write_dashboard(html_output, target)
 
-    if not rows:
-        logging.warning("GitHub did not return any usable repositories.")
-    return pd.DataFrame(rows, columns=REPOSITORY_COLUMNS)
-
-
-def make_earthquake_map(earthquakes: pd.DataFrame) -> go.Figure:
-    """Create an interactive map with earthquake magnitude and event details."""
-    if earthquakes.empty:
-        figure = go.Figure()
-        figure.add_annotation(text="No earthquake data is available.", showarrow=False)
-        figure.update_layout(title="M4.5+ Earthquakes — Past 7 Days")
-        return figure
-
-    figure = px.scatter_geo(
-        earthquakes,
-        lat="latitude",
-        lon="longitude",
-        size="magnitude",
-        color="magnitude",
-        color_continuous_scale="YlOrRd",
-        size_max=18,
-        custom_data=["url"],
-        hover_name="place",
-        hover_data={
-            "magnitude": ":.1f",
-            "time": True,
-            "latitude": ":.3f",
-            "longitude": ":.3f",
-            "depth": ":.1f",
-            "url": False,
-        },
-        title="M4.5+ Earthquakes — Past 7 Days",
-        projection="natural earth",
-    )
-    figure.update_traces(
-        hovertemplate=(
-            "<b>%{hovertext}</b><br>"
-            "Magnitude: %{customdata[1]:.1f}<br>"
-            "Time: %{customdata[2]}<br>"
-            "Latitude: %{lat:.3f}<br>"
-            "Longitude: %{lon:.3f}<br>"
-            "Depth: %{customdata[3]:.1f} km<br>"
-            "<a href='%{customdata[0]}' target='_blank'>Open USGS event</a>"
-            "<extra></extra>"
-        ),
-        customdata=earthquakes[["url", "magnitude", "time", "depth"]].to_numpy(),
-    )
-    figure.update_geos(showcountries=True, showland=True, landcolor="rgb(243, 243, 243)")
-    return figure
-
-
-def make_repository_chart(repositories: pd.DataFrame) -> go.Figure:
-    """Create a horizontal bar chart with clickable repository links."""
-    if repositories.empty:
-        figure = go.Figure()
-        figure.add_annotation(text="No repository data is available.", showarrow=False)
-        figure.update_layout(title="Top 10 Python Repositories by Stars")
-        return figure
-
-    ordered = repositories.sort_values("stars", ascending=True)
-    figure = go.Figure(
-        go.Bar(
-            x=ordered["stars"],
-            y=ordered["name"],
-            orientation="h",
-            marker_color="#4c78a8",
-            customdata=ordered[["description", "url"]].to_numpy(),
-            hovertemplate=(
-                "<b>%{y}</b><br>"
-                "Stars: %{x:,}<br>"
-                "%{customdata[0]}<br>"
-                "<a href='%{customdata[1]}' target='_blank'>Open repository</a>"
-                "<extra></extra>"
-            ),
-        )
-    )
-    figure.update_layout(
-        title="Top 10 Python Repositories by Stars",
-        xaxis_title="Stars",
-        yaxis_title="Repository",
-        yaxis={"autorange": "reversed"},
-        margin={"l": 150},
-    )
-    return figure
-
-
-def save_dashboard(map_figure: go.Figure, repository_figure: go.Figure) -> None:
-    """Save both interactive charts together in a single HTML dashboard."""
-    map_html = pio.to_html(map_figure, full_html=False, include_plotlyjs="cdn")
-    repository_html = pio.to_html(repository_figure, full_html=False, include_plotlyjs=False)
-    page = f"""<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Live Data Pipeline &amp; Interactive Dashboard</title>
-  <style>
-    body {{ max-width: 1200px; margin: 0 auto; padding: 1rem; font-family: Arial, sans-serif; }}
-    .chart {{ margin: 1rem 0 2rem; }}
-  </style>
-</head>
-<body>
-  <h1>Live Data Pipeline &amp; Interactive Dashboard</h1>
-  <section class="chart">{map_html}</section>
-  <section class="chart">{repository_html}</section>
-</body>
-</html>
-"""
-    OUTPUT_FILE.write_text(page, encoding="utf-8")
-    logging.info("Dashboard saved to %s", OUTPUT_FILE.resolve())
+    logger.info("Pipeline completed successfully.")
+    return 0
 
 
 def main() -> None:
-    """Fetch the latest data and generate the interactive dashboard."""
-    earthquakes = fetch_earthquakes()
-    repositories = fetch_top_repositories()
-
-    logging.info("Loaded %d earthquake events.", len(earthquakes))
-    logging.info("Loaded %d GitHub repositories.", len(repositories))
-    save_dashboard(
-        make_earthquake_map(earthquakes),
-        make_repository_chart(repositories),
+    """CLI entry point for QuakeScope data pipeline."""
+    parser = argparse.ArgumentParser(description="QuakeScope Global Earthquake Intelligence Pipeline.")
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=None,
+        help="Optional destination directory for index.html (e.g. _site)",
     )
+    parser.add_argument(
+        "--feed",
+        type=str,
+        default="4.5_week",
+        choices=["4.5_week", "2.5_week", "all_week", "4.5_day", "4.5_month"],
+        help="USGS GeoJSON feed identifier",
+    )
+    parser.add_argument(
+        "--offline",
+        action="store_true",
+        help="Run in offline mode using cached baseline",
+    )
+    parser.add_argument(
+        "--validate-only",
+        action="store_true",
+        help="Validate the existing index.html without modifying it",
+    )
+
+    args = parser.parse_args()
+
+    if args.validate_only:
+        valid = validate_output_html(DEFAULT_OUTPUT_FILE)
+        if valid:
+            logger.info("Validation passed for %s.", DEFAULT_OUTPUT_FILE)
+            sys.exit(0)
+        else:
+            logger.error("Validation failed for %s.", DEFAULT_OUTPUT_FILE)
+            sys.exit(1)
+
+    exit_code = run_pipeline(
+        feed_key=args.feed,
+        output_dir=args.output_dir,
+        offline_mode=args.offline,
+    )
+    sys.exit(exit_code)
 
 
 if __name__ == "__main__":

@@ -2,17 +2,1943 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Live Data Pipeline &amp; Interactive Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="QuakeScope — Interactive Global Earthquake Intelligence and Geospatial Analytics Platform.">
+  <meta name="theme-color" content="#070b14">
+  <title>QuakeScope — Global Earthquake Intelligence</title>
+
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
+
+  <!-- Plotly JS -->
+  <script src="https://cdn.plot.ly/plotly-2.29.1.min.js" charset="utf-8" crossorigin="anonymous"></script>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+
   <style>
-    body { max-width: 1200px; margin: 0 auto; padding: 1rem; font-family: Arial, sans-serif; }
-    .chart { margin: 1rem 0 2rem; }
+    /* ==========================================================================
+       QuakeScope Design System (Dark Navy / Charcoal Intelligence)
+       ========================================================================== */
+    :root {
+      --bg-base: #070b14;
+      --bg-surface: #0d1527;
+      --bg-card: #131f38;
+      --bg-card-hover: #192a4a;
+      --border: rgba(255, 255, 255, 0.09);
+      --border-accent: rgba(14, 165, 233, 0.4);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --primary: #0ea5e9;
+      --primary-hover: #38bdf8;
+      --accent-teal: #14b8a6;
+      --mag-minor: #10b981;    /* < 5.0 */
+      --mag-mod: #f59e0b;      /* 5.0 - 5.9 */
+      --mag-strong: #f97316;   /* 6.0 - 6.9 */
+      --mag-major: #ef4444;    /* >= 7.0 */
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 14px;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.35);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: var(--font-sans);
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    a:hover {
+      color: var(--primary-hover);
+      text-decoration: underline;
+    }
+
+    /* Header & Navigation */
+    .app-header {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      backdrop-filter: blur(8px);
+    }
+    .header-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0.75rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #0ea5e9, #14b8a6);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-weight: 700;
+      font-size: 18px;
+      box-shadow: 0 0 12px rgba(14, 165, 233, 0.4);
+    }
+    .brand-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .brand-tagline {
+      font-size: 0.75rem;
+      color: var(--accent-teal);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* Global Nav Tabs */
+    .nav-tabs {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav-tabs::-webkit-scrollbar { display: none; }
+    .nav-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-family: inherit;
+      font-size: 0.88rem;
+      font-weight: 500;
+      padding: 0.5rem 0.85rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+    .nav-btn:hover {
+      color: var(--text-main);
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .nav-btn.active {
+      color: #fff;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+    .nav-btn:focus-visible {
+      outline: 2px solid var(--primary);
+    }
+
+    /* Header Controls */
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      font-family: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.45rem 0.85rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--text-dim);
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    .select-feed {
+      background: var(--bg-card);
+      color: var(--text-main);
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    /* Freshness & Status Ribbon */
+    .status-ribbon {
+      background: #0a1120;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      padding: 0.35rem 1.25rem;
+    }
+    .status-ribbon-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--mag-minor);
+      box-shadow: 0 0 8px var(--mag-minor);
+    }
+    .status-dot.stale {
+      background: var(--mag-mod);
+      box-shadow: 0 0 8px var(--mag-mod);
+    }
+
+    /* Main Container */
+    .main-content {
+      max-width: 1440px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+      flex: 1;
+    }
+    .view-section {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+    .view-section.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .kpi-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.1rem;
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+    .kpi-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--primary);
+    }
+    .kpi-card.accent-teal::before { background: var(--accent-teal); }
+    .kpi-card.accent-amber::before { background: var(--mag-mod); }
+    .kpi-card.accent-red::before { background: var(--mag-major); }
+
+    .kpi-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.4rem;
+    }
+    .kpi-value {
+      font-size: 1.85rem;
+      font-weight: 700;
+      color: #fff;
+      font-family: var(--font-mono);
+      line-height: 1.2;
+    }
+    .kpi-subtext {
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      margin-top: 0.4rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Map View Layout */
+    .map-container-wrapper {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      position: relative;
+    }
+    .map-header {
+      padding: 0.85rem 1.2rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      background: #0a1120;
+    }
+    .map-title {
+      font-size: 1rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .map-filters {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    #quake-map {
+      width: 100%;
+      height: 600px;
+      background: #050811;
+    }
+    .map-hud {
+      position: absolute;
+      bottom: 12px;
+      right: 12px;
+      background: rgba(13, 21, 39, 0.88);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(4px);
+      padding: 0.35rem 0.65rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      z-index: 800;
+      pointer-events: none;
+    }
+
+    /* Leaflet Overrides */
+    .leaflet-popup-content-wrapper {
+      background: var(--bg-card) !important;
+      color: var(--text-main) !important;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm) !important;
+      box-shadow: var(--shadow-md) !important;
+      padding: 0.2rem;
+    }
+    .leaflet-popup-tip {
+      background: var(--bg-card) !important;
+    }
+    .popup-box {
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+    }
+    .popup-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+      color: #fff;
+    }
+    .popup-mag {
+      display: inline-block;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      margin-bottom: 0.4rem;
+    }
+    .popup-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.8rem;
+      margin-top: 0.2rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .popup-row strong {
+      color: #fff;
+    }
+    .popup-btn {
+      margin-top: 0.6rem;
+      display: block;
+      width: 100%;
+      text-align: center;
+      padding: 0.35rem 0.5rem;
+      background: var(--primary);
+      color: #fff !important;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-decoration: none !important;
+    }
+    .popup-btn:hover {
+      background: var(--primary-hover);
+    }
+
+    /* Map Legend */
+    .map-legend {
+      position: absolute;
+      bottom: 25px;
+      left: 12px;
+      background: rgba(13, 21, 39, 0.92);
+      border: 1px solid var(--border);
+      padding: 0.6rem 0.8rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.75rem;
+      z-index: 800;
+      backdrop-filter: blur(4px);
+    }
+    .legend-title {
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      color: var(--text-main);
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin-bottom: 0.2rem;
+      color: var(--text-muted);
+    }
+    .legend-color {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    /* Tables & Explorer */
+    .table-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      box-shadow: var(--shadow-sm);
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+    .data-table th {
+      background: #0a1120;
+      color: var(--text-muted);
+      font-weight: 600;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    .data-table th:hover {
+      color: #fff;
+    }
+    .data-table th.sorted-asc::after { content: " ▲"; font-size: 0.7rem; }
+    .data-table th.sorted-desc::after { content: " ▼"; font-size: 0.7rem; }
+    .data-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      color: var(--text-main);
+      white-space: nowrap;
+    }
+    .data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .mag-badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 700;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+    }
+    .mag-minor { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+    .mag-mod { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .mag-strong { background: rgba(249, 115, 22, 0.18); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.3); }
+    .mag-major { background: rgba(239, 68, 68, 0.22); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+
+    /* Table Toolbar */
+    .table-toolbar {
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      background: #0a1120;
+      border-bottom: 1px solid var(--border);
+    }
+    .search-input {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.45rem 0.75rem;
+      color: var(--text-main);
+      font-family: inherit;
+      font-size: 0.85rem;
+      min-width: 240px;
+    }
+    .search-input:focus {
+      outline: 2px solid var(--primary);
+    }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-top: 1px solid var(--border);
+      background: #0a1120;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .pagination-btns {
+      display: flex;
+      gap: 0.3rem;
+    }
+
+    /* Analytics Charts Grid */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    .chart-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .chart-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 0.75rem;
+    }
+    .chart-card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #fff;
+    }
+    .chart-container {
+      width: 100%;
+      height: 340px;
+    }
+
+    /* GitHub Intelligence Grid */
+    .repo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    .repo-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.2rem;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .repo-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--border-accent);
+      background: var(--bg-card);
+    }
+    .repo-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .repo-name {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #fff;
+    }
+    .repo-desc {
+      font-size: 0.84rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .repo-meta {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+    }
+    .repo-stat {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* Event Inspector Modal */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.75);
+      z-index: 2000;
+      backdrop-filter: blur(4px);
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-backdrop.open {
+      display: flex;
+    }
+    .modal-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      max-width: 640px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+      overflow: hidden;
+    }
+    .modal-header {
+      padding: 1rem 1.25rem;
+      background: #0a1120;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-body {
+      padding: 1.25rem;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    .modal-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
+    .modal-row-label {
+      font-size: 0.72rem;
+      color: var(--text-dim);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .modal-row-val {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #fff;
+    }
+    .modal-footer {
+      padding: 0.85rem 1.25rem;
+      border-top: 1px solid var(--border);
+      background: #0a1120;
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+
+    /* About Section */
+    .about-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .about-card h3 {
+      color: #fff;
+      font-size: 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+    .about-card p {
+      color: var(--text-muted);
+      margin-bottom: 0.85rem;
+      line-height: 1.6;
+    }
+    .about-card ul {
+      margin-left: 1.5rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    /* Footer */
+    .app-footer {
+      background: var(--bg-surface);
+      border-top: 1px solid var(--border);
+      padding: 1.25rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-dim);
+      margin-top: auto;
+    }
+
+    /* Reduced Motion */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+      #quake-map {
+        height: 480px;
+      }
+      .modal-body {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 640px) {
+      .header-inner {
+        padding: 0.6rem 0.85rem;
+      }
+      .main-content {
+        padding: 1rem 0.75rem 2rem;
+      }
+      #quake-map {
+        height: 380px;
+      }
+      .kpi-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>Live Data Pipeline &amp; Interactive Dashboard</h1>
-  <section class="chart"><div style="height:100%; width:100%;">                        <script>window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
-        <script charset="utf-8" src="https://cdn.plot.ly/plotly-4.1.1.min.js" integrity="sha256-O24V1F27f8pb0glCkelh3cVHLNiHAJ5gCaVtq2aNch8=" crossorigin="anonymous"></script>                <div id="94d0399c-96c8-4dc0-8a58-ac2debfcf00f" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("94d0399c-96c8-4dc0-8a58-ac2debfcf00f")) {                    Plotly.newPlot(                        "94d0399c-96c8-4dc0-8a58-ac2debfcf00f",                        [{"customdata":[["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3jl",6.3,"2026-10-20T04:20:38.737000+00:00",16.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3jd",5.0,"2026-10-20T02:54:15.972000+00:00",129.361],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3j5",4.5,"2026-10-20T00:56:32.769000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3j1",5.0,"2026-10-20T00:38:28.008000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3ic",4.9,"2026-10-19T22:42:47.298000+00:00",76.122],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3i2",4.5,"2026-10-19T21:43:36.577000+00:00",102.09],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3ge",5.7,"2026-10-19T18:55:37.471000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3ga",5.7,"2026-10-19T18:52:36.659000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3g6",4.8,"2026-10-19T18:27:46.554000+00:00",156.799],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3ft",5.1,"2026-10-19T17:45:50.479000+00:00",101.462],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3db",4.6,"2026-10-19T16:13:53.665000+00:00",536.111],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3d2",4.9,"2026-10-19T15:35:36.914000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3cu",4.6,"2026-10-19T14:47:45.038000+00:00",109.709],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3ct",5.3,"2026-10-19T14:44:24.015000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3ch",4.8,"2026-10-19T12:06:01.884000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3ce",4.8,"2026-10-19T11:52:37.111000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3c7",5.0,"2026-10-19T10:57:08.127000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3c6",5.4,"2026-10-19T10:40:21.108000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3c5",4.7,"2026-10-19T10:10:56.335000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3c1",4.9,"2026-10-19T09:45:56.107000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3bz",4.9,"2026-10-19T09:25:14.552000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3bv",4.7,"2026-10-19T09:00:39.067000+00:00",49.006],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3bu",4.9,"2026-10-19T08:54:18.185000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3bs",4.5,"2026-10-19T08:51:57.571000+00:00",124.754],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3bk",5.2,"2026-10-19T08:21:47.100000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3bi",5.4,"2026-10-19T08:12:38.235000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3be",5.3,"2026-10-19T07:55:36.888000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3bc",6.0,"2026-10-19T07:49:04.900000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3b8",4.9,"2026-10-19T07:20:52.028000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3b4",4.9,"2026-10-19T07:00:02.899000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3ar",4.5,"2026-10-19T06:15:13.394000+00:00",157.774],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u3a8",4.9,"2026-10-19T05:18:36.003000+00:00",44.017],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u38i",4.5,"2026-10-18T22:34:22.230000+00:00",551.945],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u38g",5.1,"2026-10-18T22:31:43.272000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u38b",4.7,"2026-10-18T22:06:13.969000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u37h",5.2,"2026-10-18T19:32:28.734000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u36m",4.5,"2026-10-18T16:12:55.030000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u36d",4.7,"2026-10-18T15:35:47.580000+00:00",149.951],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u366",4.6,"2026-10-18T14:30:07.877000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u35l",4.5,"2026-10-18T12:42:22.533000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u34e",5.2,"2026-10-18T08:00:06.054000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u32r",4.8,"2026-10-18T00:28:29.111000+00:00",124.07],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u30x",4.6,"2026-10-17T16:52:45.164000+00:00",189.462],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u309",5.2,"2026-10-17T13:59:34.575000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u300",4.6,"2026-10-17T12:46:23.796000+00:00",68.927],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2zb",4.6,"2026-10-17T09:07:40.745000+00:00",90.844],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2z9",4.8,"2026-10-17T08:59:51.583000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2yz",4.5,"2026-10-17T07:40:02.596000+00:00",145.265],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2yw",4.5,"2026-10-17T07:20:48.242000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2y1",5.7,"2026-10-17T05:06:57.657000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2xs",4.8,"2026-10-17T04:19:05.244000+00:00",439.394],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2x7",4.9,"2026-10-17T01:03:00.020000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2ww",4.6,"2026-10-16T23:57:50.544000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2wn",4.6,"2026-10-16T22:41:03.562000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2w9",4.5,"2026-10-16T21:30:26.101000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2w7",4.5,"2026-10-16T21:26:37.613000+00:00",535.358],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2v8",5.2,"2026-10-16T19:34:10.597000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2qn",4.6,"2026-10-16T16:17:25.793000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2qf",4.7,"2026-10-16T15:08:47.528000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2qd",4.6,"2026-10-16T15:06:34.084000+00:00",247.722],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2q5",5.0,"2026-10-16T14:09:54.288000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2pw",4.5,"2026-10-16T13:02:41.211000+00:00",25.867],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2pp",4.7,"2026-10-16T12:18:25.421000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2pl",4.9,"2026-10-16T11:57:19.839000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2ph",4.8,"2026-10-16T11:39:44.878000+00:00",108.908],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2p2",4.9,"2026-10-16T09:13:44.909000+00:00",73.712],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2p5",4.8,"2026-10-16T09:04:28.861000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2n4",4.7,"2026-10-16T04:42:40.890000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2mq",6.9,"2026-10-16T03:35:31.925000+00:00",135.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2kz",4.5,"2026-10-15T20:39:25.755000+00:00",59.487],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2i9",4.5,"2026-10-15T15:40:38.840000+00:00",22.782],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2i2",4.9,"2026-10-15T14:59:52.905000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2ht",4.5,"2026-10-15T13:31:37.166000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2hv",5.2,"2026-10-15T13:29:31.862000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2hr",4.7,"2026-10-15T13:16:26.373000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2hp",5.2,"2026-10-15T13:06:51.678000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2gd",5.4,"2026-10-15T11:16:43.668000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002faka2026ukynnb",5.6,"2026-10-15T11:07:01.800000+00:00",4.5],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2ev",5.3,"2026-10-15T05:25:31.942000+00:00",286.008],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2er",4.6,"2026-10-15T04:41:12.999000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2ec",5.1,"2026-10-15T03:36:29.038000+00:00",13.211],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2eh",4.8,"2026-10-15T03:36:08.430000+00:00",13.468],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2d6",4.5,"2026-10-14T23:20:59.714000+00:00",183.497],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u2gk",4.7,"2026-10-14T14:17:21.408000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u28y",5.9,"2026-10-14T10:49:47.588000+00:00",585.07],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u28e",4.6,"2026-10-14T09:16:18.828000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u27u",4.9,"2026-10-14T06:27:06.453000+00:00",35.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u27j",4.7,"2026-10-14T05:09:35.397000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u272",4.9,"2026-10-14T03:11:09.258000+00:00",44.914],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u273",4.8,"2026-10-14T03:02:14.593000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u271",4.7,"2026-10-14T02:59:27.574000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u26u",4.6,"2026-10-14T02:12:14.885000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u26f",5.0,"2026-10-14T00:36:45.416000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u26c",5.1,"2026-10-14T00:30:47.706000+00:00",21.947],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u25i",4.8,"2026-10-13T21:24:21.135000+00:00",162.209],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u24c",6.0,"2026-10-13T18:45:03.231000+00:00",20.842],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u23d",5.1,"2026-10-13T16:28:15.172000+00:00",36.991],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u21y",4.8,"2026-10-13T15:21:44.242000+00:00",65.699],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u21s",5.3,"2026-10-13T14:36:12.242000+00:00",29.792],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u21d",4.5,"2026-10-13T12:51:32.169000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u214",6.8,"2026-10-13T12:23:07.248000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u20z",4.9,"2026-10-13T12:05:41.519000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u20i",4.5,"2026-10-13T09:48:28.205000+00:00",35.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u20g",4.7,"2026-10-13T09:41:12.899000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u207",5.3,"2026-10-13T08:38:28.325000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u200",4.6,"2026-10-13T08:15:04.080000+00:00",10.0],["https:\u002f\u002fearthquake.usgs.gov\u002fearthquakes\u002feventpage\u002fus6000u1zh",4.7,"2026-10-13T06:39:04.944000+00:00",10.0]],"geo":"geo","hovertemplate":"\u003cb\u003e%{hovertext}\u003c\u002fb\u003e\u003cbr\u003eMagnitude: %{customdata[1]:.1f}\u003cbr\u003eTime: %{customdata[2]}\u003cbr\u003eLatitude: %{lat:.3f}\u003cbr\u003eLongitude: %{lon:.3f}\u003cbr\u003eDepth: %{customdata[3]:.1f} km\u003cbr\u003e\u003ca href='%{customdata[0]}' target='_blank'\u003eOpen USGS event\u003c\u002fa\u003e\u003cextra\u003e\u003c\u002fextra\u003e","hovertext":["197 km NW of Port-Olry, Vanuatu","Pagan region, Northern Mariana Islands","156 km SE of Kuqa, China","205 km NW of Port-Olry, Vanuatu","52 km S of Kokopo, Papua New Guinea","Kuril Islands","203 km WNW of Port-Olry, Vanuatu","198 km NW of Port-Olry, Vanuatu","88 km WNW of Hihifo, Tonga","South Sandwich Islands region","south of the Fiji Islands","77 km WSW of Murghob, Tajikistan","5 km E of San Jos\u00e9 El \u00cddolo, Guatemala","116 km WNW of H\u00f6fn, Iceland","56 km N of Ruteng, Indonesia","212 km WNW of Port-Olry, Vanuatu","31 km NW of Jiangyou, China","196 km NW of Port-Olry, Vanuatu","53 km NNE of Labuan Bajo, Indonesia","54 km NE of Labuan Bajo, Indonesia","115 km NNW of Sola, Vanuatu","163 km WNW of Tobelo, Indonesia","202 km NW of Port-Olry, Vanuatu","2 km W of Lunca Jari\u0219tei, Romania","211 km WNW of Port-Olry, Vanuatu","184 km WNW of Port-Olry, Vanuatu","188 km NW of Port-Olry, Vanuatu","186 km NW of Port-Olry, Vanuatu","203 km WNW of Port-Olry, Vanuatu","218 km WNW of Port-Olry, Vanuatu","Banda Sea","68 km WSW of San Juan del Sur, Nicaragua","Fiji region","129 km SSE of Kokopo, Papua New Guinea","147 km SSW of Kokopo, Papua New Guinea","71 km ESE of \u2018Ohonua, Tonga","0 km NE of R\u00edo Grande, Panama","20 km SW of Sandy Point Town, Saint Kitts and Nevis","Carlsberg Ridge","Kermadec Islands, New Zealand","55 km NNW of Ruteng, Indonesia","31 km SE of Kainantu, Papua New Guinea","88 km SSW of Uyuni, Bolivia","86 km SW of Brisas Barra de Suchiate, Mexico","70 km W of Tambolaka, Indonesia","51 km N of Pante Makasar, Timor Leste","110 km NE of Norsup, Vanuatu","80 km NW of Sola, Vanuatu","59 km NNW of Ruteng, Indonesia","48 km WNW of Khuzdar, Pakistan","196 km SSE of Alo, Wallis and Futuna","115 km SW of Puerto Madero, Mexico","6 km NNE of S\u00e1mi, Greece","12 km SSE of Tebario, Panama","70 km NNE of M\u012bn\u0101b, Iran","south of the Fiji Islands","off the coast of Ecuador","41 km NNE of Kilimatinde, Tanzania","186 km SSE of Vilyuchinsk, Russia","153 km W of Neiafu, Tonga","Auckland Islands, New Zealand region","51 km ESE of Jurad\u00f3, Colombia","10 km SE of Lamitan, Philippines","119 km SSW of Merizo Village, Guam","7 km WSW of Soconusco, Mexico","31 km ENE of Kinablangan, Philippines","southern East Pacific Rise","95 km SW of Brisas Barra de Suchiate, Mexico","76 km NE of Ozernovskiy, Russia","44 km SSE of Champerico, Guatemala","22 km W of Tamarindo, Costa Rica","198 km SSE of Vilyuchinsk, Russia","9 km SSE of Los Asientos, Panama","107 km NNE of Hihifo, Tonga","114 km SSW of Nikolski, Alaska","157 km W of Sola, Vanuatu","off the coast of Ecuador","43 km NNW of Lake Minchumina, Alaska","43 km SSE of Otorohanga, New Zealand","67 km N of Namuac, Philippines","36 km E of Safotu, Samoa","30 km E of Safotu, Samoa","82 km SSW of Mil\u2019kovo, Russia","central Mid-Atlantic Ridge","Fiji region","42 km NNE of Kilimatinde, Tanzania","121 km S of Kokopo, Papua New Guinea","10 km S of La Mesa, Panama","16 km WSW of La Tirana, Chile","North Atlantic Ocean","128 km S of Kokopo, Papua New Guinea","75 km E of Kokopo, Papua New Guinea","98 km NW of Coquimbo, Chile","93 km NNW of Coquimbo, Chile","5 km NW of Cepit\u00e1, Colombia","126 km S of Kokopo, Papua New Guinea","123 km S of Kokopo, Papua New Guinea","8 km SE of Sarangani, Philippines","129 km S of Kokopo, Papua New Guinea","26 km SSW of Zapotillo, Panama","central Mid-Atlantic Ridge","180 km SE of Vilyuchinsk, Russia","71 km SW of Tambolaka, Indonesia","9 km NE of Boshkengash, Tajikistan","southern Mid-Atlantic Ridge","63 km W of Bayan Hot, China","14 km WNW of R\u00edo Grande, Panama"],"lat":{"dtype":"f8","bdata":"0NVW7C\u002f7K8CNKO0NvkAyQJqZmZmZUURAE2HD0yvlK8BuNIC3QEITwMUgsHJoOUhAryXkg54NLMD7XG3F\u002fhIswNUJaCJsWC\u002fAIR\u002f0bFYtTMB4nKIjuYw3wCUGgZVD60JAY+5aQj7oLEB3LSEf9CRQQIV80LNZNSDAeHqlLEP8K8Cmm8QgsPI\u002fQN6Th4VaEyzAzqrP1VYsIMC8lpAPejYgwLmNBvAW6CnADeAtkKB4A0BEaW\u002fwhekrwCGwcmiRvUZAj8L1KFxPLMAQ6bevA0cswEku\u002fyH99ivA7MA5I0obLMAv3SQGgRUswNc07zhF5yvAf2q8dJNYGcBXW7G\u002f7D4mQCEf9GxW7TTAMlUwKqnTFcDPZtXnamsWwNEi2\u002fl+ijXAveMUHcnlHkAbnl4py0AxQAisHFpkO\u002fc\u002fqvHSTWIgPsB8YTJVMEogwF+YTBWMChrAW0I+6NksNcBkXdxGAxgsQIBIv30duCLAnRGlvcF3IcD1udqK\u002fQUvwIxK6gQ0sSrA8rBQa5o3IMAxmSoYlQQ8QOzAOSNKCzDAzH9Iv30dLEDXo3A9CidDQGwJ+aBncx5AfdCzWfW5O0AeFmpN8543wO58PzVeuvQ\u002ff2q8dJMYFsCV1AloIrRJQNXnaiv2dzLAjLlrCfnwSMC28\u002f3UeGkbQJYhjnVxGxhADi2yne+nKEDKMsSxLo4uQHo2qz5XWx9AApoIG56eS8CR7Xw\u002fNd4rQOeMKO0N\u002fklABcWPMXfNK0DQ1VbsL5skQNSa5h2nsElAgLdAguLHHUAu\u002fyH99hUuwFXBqKROAEpAEce6uI3GK8A7cM6I0t7sP65H4XoUDlBA2V92Tx5GQ8BkzF1LyDczQMUgsHJo0SrAWvW52ordKsCOdXEbDQBLQMHKoUW289W\u002fdk8eFmr9NMBHA3gLJOgVwBKDwMqhxRXAiGNd3EZDHkAJih9j7lo0wC9uowG8BRRAQYLix5j7FcB6xyk6kssRwPLSTWIQOD3AukkMAis3PcDWVuwvuycbQHS1FfvL7hXAnKIjufzHFcD5MeauJWQVQF+YTBWMChbAYTJVMCopH0C+nxov3STav8nlP6TfzklAfPKwUGvaI8CKjuTyH0JDQHWTGARWjjzAtaZ5xylqQ0Bt5\u002fup8RIfQA=="},"legendgroup":"","lon":{"dtype":"f8","bdata":"tFn1udqyZEDJdr6fGkFiQD81XrpJCFVA9P3UeOmwZECu2F92TwZjQLHh6ZWyNGNA+aBns+qvZEBhVFInoLFkQACRfvs60mXAveMUHckVO8AnoImw4XtmQBb7y+7JS1JAHVpkO9\u002fXVsDBOSNKe4MxwNV46SYxGF5AxSCwcmitZEBF2PD0Sh1aQIenV8oysmRAqDXNO04JXkDrc7UV+wteQLbz\u002fdR44WRAdnEbDeCtX0C94xQdybFkQNbFbTSANzpAseHplbKqZEAtIR\u002f0bLRkQKrx0k1itmRAa5p3nKK1ZEBBguLHmK9kQD81XrpJrGRAJCh+jLk9YECJQWDl0J5VwAK8BRIUVWbAcvkP6bcTY0Dpt68D5\u002fpiQFOWIY51yWXAcF8HzhlVVMBGtvP91IBPwKW9wRcmv1BAjgbwFkgsZsB9rrZifxFeQMiYu5aQQWJAyxDHurjNUMCC4seYuzZXwJhMFYxKpl1A7lpCPugVX0COdXEbDQhlQJM6AU2E4WRA\u002fBhz1xISXkAJih9j7opQQKg1zTtON2bAayv2l91PV8CrPldbsa80QGsr9pfdO1TAirDh6ZWqTEDMf0i\u002ffXlmwD0K16NwUVXAm1Wfq62QQUCNKO0NvvBjQNZW7C+77WXACYofY+5sZEAWak3zjldTwK62Yn\u002fZcV9A0m9fB84DYkCRfvs6cDJXwEJg5dAis19A6+I2GsCfX8DQ1VbsLzdXwMpUwaikqGNAzqrP1Vb0VsBCYOXQIoNVwCzUmuYd+2NAGeJYF7cFVMA51sVtNK5lwN9PjZduMmXAxf6ye\u002fLCZEDQRNjw9FZVwB1aZDvfF2PAOdbFbTTsZUBcj8L1KFBeQC6QoPgxgmXAnRGlvcGDZcCgibDh6cVjQPfkYaHWNDPAQj7o2axYZsBoImx4eoVBQJ+rrdhfCGNA+zpwzogmVMAwTKYKRpFRwIQNT6+UlTvAqoJRSZ0MY0AukKD4MR5jQEI+6Nms+lHA3pOHhVrzUcAj2\u002fl+akBSwJVliGNdBGNA4XoUrkcDY0ATYcPTK2FfQHUCmggbBGNAbef7qfFmVMDnHafoSG4zwAMJih9j\u002fmNABhIUP8a0XUBwXwfOGTlRQNEi2\u002fl+CinA8WPMXUs8WkBUdCSX\u002f1xUwA=="},"marker":{"color":{"dtype":"f8","bdata":"MzMzMzMzGUAAAAAAAAAUQAAAAAAAABJAAAAAAAAAFECamZmZmZkTQAAAAAAAABJAzczMzMzMFkDNzMzMzMwWQDMzMzMzMxNAZmZmZmZmFEBmZmZmZmYSQJqZmZmZmRNAZmZmZmZmEkAzMzMzMzMVQDMzMzMzMxNAMzMzMzMzE0AAAAAAAAAUQJqZmZmZmRVAzczMzMzMEkCamZmZmZkTQJqZmZmZmRNAzczMzMzMEkCamZmZmZkTQAAAAAAAABJAzczMzMzMFECamZmZmZkVQDMzMzMzMxVAAAAAAAAAGECamZmZmZkTQJqZmZmZmRNAAAAAAAAAEkCamZmZmZkTQAAAAAAAABJAZmZmZmZmFEDNzMzMzMwSQM3MzMzMzBRAAAAAAAAAEkDNzMzMzMwSQGZmZmZmZhJAAAAAAAAAEkDNzMzMzMwUQDMzMzMzMxNAZmZmZmZmEkDNzMzMzMwUQGZmZmZmZhJAZmZmZmZmEkAzMzMzMzMTQAAAAAAAABJAAAAAAAAAEkDNzMzMzMwWQDMzMzMzMxNAmpmZmZmZE0BmZmZmZmYSQGZmZmZmZhJAAAAAAAAAEkAAAAAAAAASQM3MzMzMzBRAZmZmZmZmEkDNzMzMzMwSQGZmZmZmZhJAAAAAAAAAFEAAAAAAAAASQM3MzMzMzBJAmpmZmZmZE0AzMzMzMzMTQJqZmZmZmRNAMzMzMzMzE0DNzMzMzMwSQJqZmZmZmRtAAAAAAAAAEkAAAAAAAAASQJqZmZmZmRNAAAAAAAAAEkDNzMzMzMwUQM3MzMzMzBJAzczMzMzMFECamZmZmZkVQGZmZmZmZhZAMzMzMzMzFUBmZmZmZmYSQGZmZmZmZhRAMzMzMzMzE0AAAAAAAAASQM3MzMzMzBJAmpmZmZmZF0BmZmZmZmYSQJqZmZmZmRNAzczMzMzMEkCamZmZmZkTQDMzMzMzMxNAzczMzMzMEkBmZmZmZmYSQAAAAAAAABRAZmZmZmZmFEAzMzMzMzMTQAAAAAAAABhAZmZmZmZmFEAzMzMzMzMTQDMzMzMzMxVAAAAAAAAAEkAzMzMzMzMbQJqZmZmZmRNAAAAAAAAAEkDNzMzMzMwSQDMzMzMzMxVAZmZmZmZmEkDNzMzMzMwSQA=="},"coloraxis":"coloraxis","size":{"dtype":"f8","bdata":"MzMzMzMzGUAAAAAAAAAUQAAAAAAAABJAAAAAAAAAFECamZmZmZkTQAAAAAAAABJAzczMzMzMFkDNzMzMzMwWQDMzMzMzMxNAZmZmZmZmFEBmZmZmZmYSQJqZmZmZmRNAZmZmZmZmEkAzMzMzMzMVQDMzMzMzMxNAMzMzMzMzE0AAAAAAAAAUQJqZmZmZmRVAzczMzMzMEkCamZmZmZkTQJqZmZmZmRNAzczMzMzMEkCamZmZmZkTQAAAAAAAABJAzczMzMzMFECamZmZmZkVQDMzMzMzMxVAAAAAAAAAGECamZmZmZkTQJqZmZmZmRNAAAAAAAAAEkCamZmZmZkTQAAAAAAAABJAZmZmZmZmFEDNzMzMzMwSQM3MzMzMzBRAAAAAAAAAEkDNzMzMzMwSQGZmZmZmZhJAAAAAAAAAEkDNzMzMzMwUQDMzMzMzMxNAZmZmZmZmEkDNzMzMzMwUQGZmZmZmZhJAZmZmZmZmEkAzMzMzMzMTQAAAAAAAABJAAAAAAAAAEkDNzMzMzMwWQDMzMzMzMxNAmpmZmZmZE0BmZmZmZmYSQGZmZmZmZhJAAAAAAAAAEkAAAAAAAAASQM3MzMzMzBRAZmZmZmZmEkDNzMzMzMwSQGZmZmZmZhJAAAAAAAAAFEAAAAAAAAASQM3MzMzMzBJAmpmZmZmZE0AzMzMzMzMTQJqZmZmZmRNAMzMzMzMzE0DNzMzMzMwSQJqZmZmZmRtAAAAAAAAAEkAAAAAAAAASQJqZmZmZmRNAAAAAAAAAEkDNzMzMzMwUQM3MzMzMzBJAzczMzMzMFECamZmZmZkVQGZmZmZmZhZAMzMzMzMzFUBmZmZmZmYSQGZmZmZmZhRAMzMzMzMzE0AAAAAAAAASQM3MzMzMzBJAmpmZmZmZF0BmZmZmZmYSQJqZmZmZmRNAzczMzMzMEkCamZmZmZkTQDMzMzMzMxNAzczMzMzMEkBmZmZmZmYSQAAAAAAAABRAZmZmZmZmFEAzMzMzMzMTQAAAAAAAABhAZmZmZmZmFEAzMzMzMzMTQDMzMzMzMxVAAAAAAAAAEkAzMzMzMzMbQJqZmZmZmRNAAAAAAAAAEkDNzMzMzMwSQDMzMzMzMxVAZmZmZmZmEkDNzMzMzMwSQA=="},"sizemode":"area","sizeref":0.021296296296296296,"symbol":"circle"},"mode":"markers","name":"","showlegend":false,"type":"scattergeo"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05}}},"geo":{"domain":{"x":[0.0,1.0],"y":[0.0,1.0]},"projection":{"type":"natural earth"},"center":{},"showcountries":true,"showland":true,"landcolor":"rgb(243, 243, 243)"},"coloraxis":{"colorbar":{"title":{"text":"magnitude"}},"colorscale":[[0.0,"rgb(255,255,204)"],[0.125,"rgb(255,237,160)"],[0.25,"rgb(254,217,118)"],[0.375,"rgb(254,178,76)"],[0.5,"rgb(253,141,60)"],[0.625,"rgb(252,78,42)"],[0.75,"rgb(227,26,28)"],[0.875,"rgb(189,0,38)"],[1.0,"rgb(128,0,38)"]],"autocolorscale":false},"legend":{"tracegroupgap":0,"itemsizing":"constant"},"title":{"text":"M4.5+ Earthquakes \u2014 Past 7 Days"}},                        {"responsive": true}                    )                };            </script>        </div></section>
-  <section class="chart"><div style="height:100%; width:100%;">                            <div id="7db66baa-2b0e-499a-8011-e1065f4306e1" class="plotly-graph-div" style="height:100%; width:100%;"></div>            <script>                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("7db66baa-2b0e-499a-8011-e1065f4306e1")) {                    Plotly.newPlot(                        "7db66baa-2b0e-499a-8011-e1065f4306e1",                        [{"customdata":[["AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.","https:\u002f\u002fgithub.com\u002fSignificant-Gravitas\u002fAutoGPT"],["Python tool for converting files and office documents to Markdown.","https:\u002f\u002fgithub.com\u002fmicrosoft\u002fmarkitdown"],["A feature-rich command-line audio\u002fvideo downloader","https:\u002f\u002fgithub.com\u002fyt-dlp\u002fyt-dlp"],["All Algorithms implemented in Python","https:\u002f\u002fgithub.com\u002fTheAlgorithms\u002fPython"],["The agent that grows with you","https:\u002f\u002fgithub.com\u002fNousResearch\u002fhermes-agent"],["Curated list of project-based tutorials","https:\u002f\u002fgithub.com\u002fpractical-tutorials\u002fproject-based-learning"],["The definitive list that answers \"I want to do X in Python, which tool should I use?\"","https:\u002f\u002fgithub.com\u002fvinta\u002fawesome-python"],["Learn how to design large-scale systems. Prep for the system design interview.  Includes Anki flashcards.","https:\u002f\u002fgithub.com\u002fdonnemartin\u002fsystem-design-primer"],[":books: Freely available programming books","https:\u002f\u002fgithub.com\u002fEbookFoundation\u002ffree-programming-books"],["A collective list of free APIs","https:\u002f\u002fgithub.com\u002fpublic-apis\u002fpublic-apis"]],"hovertemplate":"\u003cb\u003e%{y}\u003c\u002fb\u003e\u003cbr\u003eStars: %{x:,}\u003cbr\u003e%{customdata[0]}\u003cbr\u003e\u003ca href='%{customdata[1]}' target='_blank'\u003eOpen repository\u003c\u002fa\u003e\u003cextra\u003e\u003c\u002fextra\u003e","marker":{"color":"#4c78a8"},"orientation":"h","x":{"dtype":"i4","bdata":"Et0CALzqAgB4CwMAg3ADAGjlAwBqYgQAYgQFACq4BQABGQYAfHwHAA=="},"y":["Significant-Gravitas\u002fAutoGPT","microsoft\u002fmarkitdown","yt-dlp\u002fyt-dlp","TheAlgorithms\u002fPython","NousResearch\u002fhermes-agent","practical-tutorials\u002fproject-based-learning","vinta\u002fawesome-python","donnemartin\u002fsystem-design-primer","EbookFoundation\u002ffree-programming-books","public-apis\u002fpublic-apis"],"type":"bar"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05}}},"yaxis":{"title":{"text":"Repository"},"autorange":"reversed"},"margin":{"l":150},"title":{"text":"Top 10 Python Repositories by Stars"},"xaxis":{"title":{"text":"Stars"}}},                        {"responsive": true}                    )                };            </script>        </div></section>
+
+  <!-- Top Application Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand">
+        <div class="brand-icon">Q</div>
+        <div>
+          <div class="brand-title">QuakeScope</div>
+          <div class="brand-tagline">Global Earthquake Intelligence</div>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="nav-tabs" role="tablist" aria-label="Main Navigation">
+        <button class="nav-btn active" role="tab" aria-selected="true" data-tab="overview">
+          <span>Overview</span>
+        </button>
+        <button class="nav-btn" role="tab" aria-selected="false" data-tab="map-view">
+          <span>Live Map</span>
+        </button>
+        <button class="nav-btn" role="tab" aria-selected="false" data-tab="analytics">
+          <span>Analytics</span>
+        </button>
+        <button class="nav-btn" role="tab" aria-selected="false" data-tab="explorer">
+          <span>Explorer</span>
+        </button>
+        <button class="nav-btn" role="tab" aria-selected="false" data-tab="github-view">
+          <span>GitHub Intelligence</span>
+        </button>
+        <button class="nav-btn" role="tab" aria-selected="false" data-tab="about">
+          <span>About</span>
+        </button>
+      </nav>
+
+      <!-- Actions -->
+      <div class="header-actions">
+        <select id="feed-select" class="select-feed" aria-label="Select USGS Earthquake Feed">
+          <option value="4.5_week" selected>Past 7 Days (M4.5+)</option>
+          <option value="2.5_week">Past 7 Days (M2.5+)</option>
+          <option value="4.5_day">Past 24 Hours (M4.5+)</option>
+          <option value="4.5_month">Past 30 Days (M4.5+)</option>
+        </select>
+        <button id="btn-refresh" class="btn btn-primary" title="Fetch latest feed from USGS">
+          <span id="refresh-icon">🔄</span> Refresh
+        </button>
+        <button id="btn-tz-toggle" class="btn" title="Toggle UTC or Local Browser Time">
+          <span id="tz-label">UTC</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Data Freshness Ribbon -->
+  <aside class="status-ribbon" aria-label="Data Freshness and Status">
+    <div class="status-ribbon-inner">
+      <div class="status-badge">
+        <span id="live-dot" class="status-dot"></span>
+        <span id="freshness-text">Loading intelligence data...</span>
+      </div>
+      <div>
+        <span>Source: <strong>USGS Hazards GeoJSON</strong> &amp; <strong>GitHub REST API</strong></span>
+        &bull;
+        <span id="record-count-badge">0 events tracked</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content Areas -->
+  <main class="main-content">
+
+    <!-- VIEW 1: OVERVIEW -->
+    <section id="view-overview" class="view-section active" role="tabpanel" aria-label="Overview">
+      <!-- KPI Metrics -->
+      <div class="kpi-grid">
+        <div class="kpi-card accent-teal">
+          <div class="kpi-label">Total Earthquakes</div>
+          <div id="kpi-total" class="kpi-value">--</div>
+          <div class="kpi-subtext" id="kpi-time-window">Recorded in selected feed</div>
+        </div>
+        <div class="kpi-card accent-red">
+          <div class="kpi-label">Peak Magnitude</div>
+          <div id="kpi-max-mag" class="kpi-value">--</div>
+          <div class="kpi-subtext" id="kpi-max-place">--</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Average Magnitude</div>
+          <div id="kpi-avg-mag" class="kpi-value">--</div>
+          <div class="kpi-subtext">Overall energy index</div>
+        </div>
+        <div class="kpi-card accent-amber">
+          <div class="kpi-label">Significant Quakes (M5.0+)</div>
+          <div id="kpi-strong" class="kpi-value">--</div>
+          <div class="kpi-subtext">High impact events</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Shallow Events (&lt;70km)</div>
+          <div id="kpi-shallow" class="kpi-value">--</div>
+          <div class="kpi-subtext">Highest surface shaking</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Most Active Region</div>
+          <div id="kpi-active-region" class="kpi-value" style="font-size: 1.25rem;">--</div>
+          <div class="kpi-subtext">Seismic hotspot</div>
+        </div>
+      </div>
+
+      <!-- Quick Map Preview & Recent Feed -->
+      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; margin-top: 1.5rem;">
+        <div class="map-container-wrapper">
+          <div class="map-header">
+            <span class="map-title">Global Seismic Activity Map</span>
+            <button class="btn btn-primary" onclick="QuakeScopeApp.switchTab('map-view')">Expand Full Map &rarr;</button>
+          </div>
+          <div id="overview-map" style="height: 420px; width: 100%;"></div>
+        </div>
+
+        <div style="background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 1rem; display: flex; flex-direction: column;">
+          <h3 style="font-size: 0.95rem; font-weight: 700; margin-bottom: 0.8rem; color: #fff;">Latest Seismic Events</h3>
+          <div id="recent-feed-list" style="overflow-y: auto; max-height: 380px; display: flex; flex-direction: column; gap: 0.6rem;">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: LIVE MAP -->
+    <section id="view-map-view" class="view-section" role="tabpanel" aria-label="Interactive Map">
+      <div class="map-container-wrapper">
+        <div class="map-header">
+          <span class="map-title">Interactive Geospatial Intelligence Map</span>
+          <div class="map-filters">
+            <label style="font-size: 0.8rem; color: var(--text-muted);">
+              Min Mag:
+              <select id="map-filter-mag" class="select-feed" style="padding: 0.25rem 0.5rem;">
+                <option value="0">All</option>
+                <option value="4.5">M4.5+</option>
+                <option value="5.0">M5.0+</option>
+                <option value="6.0">M6.0+</option>
+              </select>
+            </label>
+            <label style="font-size: 0.8rem; color: var(--text-muted);">
+              Depth:
+              <select id="map-filter-depth" class="select-feed" style="padding: 0.25rem 0.5rem;">
+                <option value="all">All Depths</option>
+                <option value="shallow">Shallow (&lt;70km)</option>
+                <option value="intermediate">Intermediate (70-300km)</option>
+                <option value="deep">Deep (&ge;300km)</option>
+              </select>
+            </label>
+            <button id="btn-reset-map" class="btn">Reset View</button>
+            <button id="btn-fullscreen-map" class="btn">Fullscreen</button>
+          </div>
+        </div>
+
+        <div id="quake-map"></div>
+
+        <!-- Coordinates HUD -->
+        <div id="map-coords" class="map-hud">Lat: --, Lon: --</div>
+
+        <!-- Map Legend -->
+        <div class="map-legend">
+          <div class="legend-title">Magnitude Scale</div>
+          <div class="legend-item"><span class="legend-color" style="background: var(--mag-minor);"></span> M &lt; 5.0 (Minor)</div>
+          <div class="legend-item"><span class="legend-color" style="background: var(--mag-mod);"></span> M 5.0 - 5.9 (Moderate)</div>
+          <div class="legend-item"><span class="legend-color" style="background: var(--mag-strong);"></span> M 6.0 - 6.9 (Strong)</div>
+          <div class="legend-item"><span class="legend-color" style="background: var(--mag-major);"></span> M &ge; 7.0 (Major)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: ANALYTICS -->
+    <section id="view-analytics" class="view-section" role="tabpanel" aria-label="Analytics & Distributions">
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-card-title">Magnitude Distribution</span>
+          </div>
+          <div id="chart-mag-dist" class="chart-container"></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-card-title">Depth Distribution (km)</span>
+          </div>
+          <div id="chart-depth-dist" class="chart-container"></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-card-title">Seismic Activity by UTC Hour</span>
+          </div>
+          <div id="chart-hourly" class="chart-container"></div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <span class="chart-card-title">Top 10 Active Regions</span>
+          </div>
+          <div id="chart-regions" class="chart-container"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: EXPLORER -->
+    <section id="view-explorer" class="view-section" role="tabpanel" aria-label="Earthquake Explorer">
+      <div class="table-container">
+        <div class="table-toolbar">
+          <input type="text" id="explorer-search" class="search-input" placeholder="Search place, country, or event ID..." aria-label="Search earthquakes">
+          <div style="display: flex; gap: 0.6rem; align-items: center; flex-wrap: wrap;">
+            <select id="explorer-filter-mag" class="select-feed">
+              <option value="0">All Magnitudes</option>
+              <option value="4.5">M 4.5+</option>
+              <option value="5.0">M 5.0+</option>
+              <option value="6.0">M 6.0+</option>
+            </select>
+            <button id="btn-export-csv" class="btn">📥 Export CSV</button>
+            <button id="btn-export-geojson" class="btn">📥 Export GeoJSON</button>
+          </div>
+        </div>
+
+        <table class="data-table" aria-label="Earthquake Events Table">
+          <thead>
+            <tr>
+              <th data-sort="magnitude">Magnitude</th>
+              <th data-sort="place">Location</th>
+              <th data-sort="time_ms">Date &amp; Time (<span class="col-tz">UTC</span>)</th>
+              <th data-sort="depth_km">Depth (km)</th>
+              <th>Coordinates</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="explorer-table-body">
+            <!-- Dynamically populated -->
+          </tbody>
+        </table>
+
+        <div class="pagination">
+          <span id="pagination-info">Showing 0-0 of 0 events</span>
+          <div class="pagination-btns">
+            <button id="btn-prev-page" class="btn" disabled>&larr; Prev</button>
+            <button id="btn-next-page" class="btn" disabled>Next &rarr;</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 5: GITHUB INTELLIGENCE -->
+    <section id="view-github-view" class="view-section" role="tabpanel" aria-label="GitHub Repository Intelligence">
+      <div class="kpi-grid">
+        <div class="kpi-card accent-teal">
+          <div class="kpi-label">Top Python Repository</div>
+          <div id="kpi-top-repo" class="kpi-value" style="font-size: 1.3rem;">--</div>
+          <div id="kpi-top-repo-stars" class="kpi-subtext">-- stars</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Total Stars Tracked</div>
+          <div id="kpi-total-stars" class="kpi-value">--</div>
+          <div class="kpi-subtext">Top 10 open-source Python repos</div>
+        </div>
+      </div>
+
+      <!-- Horizontal Bar Chart -->
+      <div class="chart-card" style="margin-top: 1.5rem;">
+        <div class="chart-card-header">
+          <span class="chart-card-title">Top 10 Python Repositories by Star Count</span>
+        </div>
+        <div id="chart-github-repos" class="chart-container" style="height: 380px;"></div>
+      </div>
+
+      <!-- Repository Cards -->
+      <div id="repo-cards-container" class="repo-grid">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- VIEW 6: ABOUT & SOURCES -->
+    <section id="view-about" class="view-section" role="tabpanel" aria-label="About and Sources">
+      <div class="about-card">
+        <h3>About QuakeScope — Global Earthquake Intelligence</h3>
+        <p>
+          QuakeScope is an open-source geospatial intelligence and monitoring dashboard designed to provide
+          real-time visibility into worldwide seismic activity. It transforms raw GeoJSON telemetry from the
+          United States Geological Survey (USGS) and software analytics from GitHub into interactive, accessible,
+          and actionable intelligence.
+        </p>
+      </div>
+
+      <div class="about-card">
+        <h3>Data Ingestion &amp; Reliability</h3>
+        <ul>
+          <li><strong>USGS Earthquake Hazards Program:</strong> Standard GeoJSON feeds updated every minute. Supports M4.5+, M2.5+, and all recorded events globally.</li>
+          <li><strong>GitHub Search API:</strong> Popular Python repository trends tracked with star counts and metadata.</li>
+          <li><strong>Zero-Data-Loss Architecture:</strong> Atomic file writing and local caching ensure that temporary network glitches or API rate limits never wipe out previous intelligence.</li>
+          <li><strong>Direct Client-Side Refresh:</strong> Visitors can query the live USGS CORS endpoint directly from the browser to refresh data without waiting for static deployment cycles.</li>
+        </ul>
+      </div>
+
+      <div class="about-card">
+        <h3>Technology Stack &amp; Standards</h3>
+        <p>
+          Built with Python 3, Pandas, Leaflet.js, Plotly, and semantic HTML5/CSS3.
+          Fully responsive across desktop, tablet, and mobile devices (tested down to 360px).
+          Adheres to WCAG 2.1 accessibility guidelines with high-contrast palette and keyboard navigation.
+        </p>
+        <p>
+          Repository: <a href="https://github.com/KhaleelxRahman/earthquake-github-dashboard" target="_blank" rel="noopener noreferrer">github.com/KhaleelxRahman/earthquake-github-dashboard</a>
+        </p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Event Detail Modal -->
+  <div id="event-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-event-title">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-event-title" style="color: #fff; font-size: 1.05rem;">Earthquake Event Details</h3>
+        <button id="btn-close-modal" class="btn" style="padding: 0.2rem 0.5rem;">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-row">
+          <span class="modal-row-label">Magnitude</span>
+          <span id="modal-mag" class="modal-row-val">--</span>
+        </div>
+        <div class="modal-row">
+          <span class="modal-row-label">Depth</span>
+          <span id="modal-depth" class="modal-row-val">--</span>
+        </div>
+        <div class="modal-row">
+          <span class="modal-row-label">Place</span>
+          <span id="modal-place" class="modal-row-val" style="grid-column: span 2;">--</span>
+        </div>
+        <div class="modal-row">
+          <span class="modal-row-label">Event Timestamp</span>
+          <span id="modal-time" class="modal-row-val">--</span>
+        </div>
+        <div class="modal-row">
+          <span class="modal-row-label">Coordinates</span>
+          <span id="modal-coords" class="modal-row-val">--</span>
+        </div>
+        <div class="modal-row">
+          <span class="modal-row-label">Felt Reports</span>
+          <span id="modal-felt" class="modal-row-val">--</span>
+        </div>
+        <div class="modal-row">
+          <span class="modal-row-label">Tsunami Warning</span>
+          <span id="modal-tsunami" class="modal-row-val">--</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <a id="modal-usgs-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+          View on Official USGS Event Page &rarr;
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="app-footer">
+    <div>QuakeScope &copy; 2026 Khaleel Rahman. Open source intelligence platform under MIT License.</div>
+    <div style="margin-top: 0.3rem;">Geospatial telemetry provided by USGS. Not affiliated with the United States Geological Survey.</div>
+  </footer>
+
+  <!-- Embedded Initial Payload -->
+  <script id="quakescope-data" type="application/json">
+    {"earthquakes": [{"id": "us6000u3jl", "place": "197 km NW of Port-Olry, Vanuatu", "magnitude": 6.3, "time_ms": 1792470038737, "time_iso": "2026-10-20T04:20:38.737000+00:00", "latitude": -13.9906, "longitude": 165.5892, "depth_km": 16.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3jl", "felt": null, "tsunami": 0, "significance": 630, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3jd", "place": "Pagan region, Northern Mariana Islands", "magnitude": 5.0, "time_ms": 1792464855972, "time_iso": "2026-10-20T02:54:15.972000+00:00", "latitude": 18.2529, "longitude": 146.0345, "depth_km": 129.36, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3jd", "felt": null, "tsunami": 0, "significance": 500, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3j5", "place": "156 km SE of Kuqa, China", "magnitude": 4.5, "time_ms": 1792457792769, "time_iso": "2026-10-20T00:56:32.769000+00:00", "latitude": 40.6375, "longitude": 84.1295, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3j5", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3j1", "place": "205 km NW of Port-Olry, Vanuatu", "magnitude": 5.0, "time_ms": 1792456708008, "time_iso": "2026-10-20T00:38:28.008000+00:00", "latitude": -13.9476, "longitude": 165.5285, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3j1", "felt": null, "tsunami": 0, "significance": 500, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3ic", "place": "52 km S of Kokopo, Papua New Guinea", "magnitude": 4.9, "time_ms": 1792449767298, "time_iso": "2026-10-19T22:42:47.298000+00:00", "latitude": -4.8147, "longitude": 152.1972, "depth_km": 76.12, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3ic", "felt": null, "tsunami": 0, "significance": 490, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3i2", "place": "Kuril Islands", "magnitude": 4.5, "time_ms": 1792446216577, "time_iso": "2026-10-19T21:43:36.577000+00:00", "latitude": 48.4485, "longitude": 153.6468, "depth_km": 102.09, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3i2", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3ge", "place": "203 km WNW of Port-Olry, Vanuatu", "magnitude": 5.7, "time_ms": 1792436137471, "time_iso": "2026-10-19T18:55:37.471000+00:00", "latitude": -14.0266, "longitude": 165.4974, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3ge", "felt": null, "tsunami": 0, "significance": 570, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3ga", "place": "198 km NW of Port-Olry, Vanuatu", "magnitude": 5.7, "time_ms": 1792435956659, "time_iso": "2026-10-19T18:52:36.659000+00:00", "latitude": -14.0371, "longitude": 165.5508, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3ga", "felt": null, "tsunami": 0, "significance": 570, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3g6", "place": "88 km WNW of Hihifo, Tonga", "magnitude": 4.8, "time_ms": 1792434466554, "time_iso": "2026-10-19T18:27:46.554000+00:00", "latitude": -15.6727, "longitude": -174.5697, "depth_km": 156.8, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3g6", "felt": null, "tsunami": 0, "significance": 480, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3ft", "place": "South Sandwich Islands region", "magnitude": 5.1, "time_ms": 1792431950479, "time_iso": "2026-10-19T17:45:50.479000+00:00", "latitude": -56.3542, "longitude": -27.0851, "depth_km": 101.46, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3ft", "felt": null, "tsunami": 0, "significance": 509, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3db", "place": "south of the Fiji Islands", "magnitude": 4.6, "time_ms": 1792426433665, "time_iso": "2026-10-19T16:13:53.665000+00:00", "latitude": -23.5497, "longitude": 179.8713, "depth_km": 536.11, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3db", "felt": null, "tsunami": 0, "significance": 459, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3d2", "place": "77 km WSW of Murghob, Tajikistan", "magnitude": 4.9, "time_ms": 1792424136914, "time_iso": "2026-10-19T15:35:36.914000+00:00", "latitude": 37.838, "longitude": 73.1842, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3d2", "felt": null, "tsunami": 0, "significance": 490, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3cu", "place": "5 km E of San José El Ídolo, Guatemala", "magnitude": 4.6, "time_ms": 1792421265038, "time_iso": "2026-10-19T14:47:45.038000+00:00", "latitude": 14.4536, "longitude": -91.373, "depth_km": 109.71, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3cu", "felt": null, "tsunami": 0, "significance": 459, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3ct", "place": "116 km WNW of Höfn, Iceland", "magnitude": 5.3, "time_ms": 1792421064015, "time_iso": "2026-10-19T14:44:24.015000+00:00", "latitude": 64.5774, "longitude": -17.5136, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3ct", "felt": null, "tsunami": 0, "significance": 530, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3ch", "place": "56 km N of Ruteng, Indonesia", "magnitude": 4.8, "time_ms": 1792411561884, "time_iso": "2026-10-19T12:06:01.884000+00:00", "latitude": -8.1042, "longitude": 120.378, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3ch", "felt": null, "tsunami": 0, "significance": 480, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3ce", "place": "212 km WNW of Port-Olry, Vanuatu", "magnitude": 4.8, "time_ms": 1792410757111, "time_iso": "2026-10-19T11:52:37.111000+00:00", "latitude": -13.9927, "longitude": 165.419, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3ce", "felt": null, "tsunami": 0, "significance": 480, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3c7", "place": "31 km NW of Jiangyou, China", "magnitude": 5.0, "time_ms": 1792407428127, "time_iso": "2026-10-19T10:57:08.127000+00:00", "latitude": 31.948, "longitude": 104.4577, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3c7", "felt": null, "tsunami": 0, "significance": 500, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3c6", "place": "196 km NW of Port-Olry, Vanuatu", "magnitude": 5.4, "time_ms": 1792406421108, "time_iso": "2026-10-19T10:40:21.108000+00:00", "latitude": -14.0378, "longitude": 165.5687, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3c6", "felt": null, "tsunami": 0, "significance": 540, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3c5", "place": "53 km NNE of Labuan Bajo, Indonesia", "magnitude": 4.7, "time_ms": 1792404656335, "time_iso": "2026-10-19T10:10:56.335000+00:00", "latitude": -8.0866, "longitude": 120.1454, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3c5", "felt": null, "tsunami": 0, "significance": 470, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3c1", "place": "54 km NE of Labuan Bajo, Indonesia", "magnitude": 4.9, "time_ms": 1792403156107, "time_iso": "2026-10-19T09:45:56.107000+00:00", "latitude": -8.1064, "longitude": 120.1872, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3c1", "felt": null, "tsunami": 0, "significance": 490, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3bz", "place": "115 km NNW of Sola, Vanuatu", "magnitude": 4.9, "time_ms": 1792401914552, "time_iso": "2026-10-19T09:25:14.552000+00:00", "latitude": -12.9533, "longitude": 167.046, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3bz", "felt": null, "tsunami": 0, "significance": 490, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3bv", "place": "163 km WNW of Tobelo, Indonesia", "magnitude": 4.7, "time_ms": 1792400439067, "time_iso": "2026-10-19T09:00:39.067000+00:00", "latitude": 2.4339, "longitude": 126.7168, "depth_km": 49.01, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3bv", "felt": null, "tsunami": 0, "significance": 470, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3bu", "place": "202 km NW of Port-Olry, Vanuatu", "magnitude": 4.9, "time_ms": 1792400058185, "time_iso": "2026-10-19T08:54:18.185000+00:00", "latitude": -13.9561, "longitude": 165.5558, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3bu", "felt": null, "tsunami": 0, "significance": 490, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3bs", "place": "2 km W of Lunca Jariștei, Romania", "magnitude": 4.5, "time_ms": 1792399917571, "time_iso": "2026-10-19T08:51:57.571000+00:00", "latitude": 45.481, "longitude": 26.2168, "depth_km": 124.75, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3bs", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3bk", "place": "211 km WNW of Port-Olry, Vanuatu", "magnitude": 5.2, "time_ms": 1792398107100, "time_iso": "2026-10-19T08:21:47.100000+00:00", "latitude": -14.155, "longitude": 165.3343, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3bk", "felt": null, "tsunami": 0, "significance": 520, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3bi", "place": "184 km WNW of Port-Olry, Vanuatu", "magnitude": 5.4, "time_ms": 1792397558235, "time_iso": "2026-10-19T08:12:38.235000+00:00", "latitude": -14.1387, "longitude": 165.6383, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3bi", "felt": null, "tsunami": 0, "significance": 540, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3be", "place": "188 km NW of Port-Olry, Vanuatu", "magnitude": 5.3, "time_ms": 1792396536888, "time_iso": "2026-10-19T07:55:36.888000+00:00", "latitude": -13.9824, "longitude": 165.6995, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3be", "felt": null, "tsunami": 0, "significance": 530, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3bc", "place": "186 km NW of Port-Olry, Vanuatu", "magnitude": 6.0, "time_ms": 1792396144900, "time_iso": "2026-10-19T07:49:04.900000+00:00", "latitude": -14.0533, "longitude": 165.6761, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3bc", "felt": null, "tsunami": 0, "significance": 600, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3b8", "place": "203 km WNW of Port-Olry, Vanuatu", "magnitude": 4.9, "time_ms": 1792394452028, "time_iso": "2026-10-19T07:20:52.028000+00:00", "latitude": -14.042, "longitude": 165.4874, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3b8", "felt": null, "tsunami": 0, "significance": 490, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3b4", "place": "218 km WNW of Port-Olry, Vanuatu", "magnitude": 4.9, "time_ms": 1792393202899, "time_iso": "2026-10-19T07:00:02.899000+00:00", "latitude": -13.9517, "longitude": 165.384, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3b4", "felt": null, "tsunami": 0, "significance": 490, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3ar", "place": "Banda Sea", "magnitude": 4.5, "time_ms": 1792390513394, "time_iso": "2026-10-19T06:15:13.394000+00:00", "latitude": -6.3365, "longitude": 129.9289, "depth_km": 157.77, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3ar", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u3a8", "place": "68 km WSW of San Juan del Sur, Nicaragua", "magnitude": 4.9, "time_ms": 1792387116003, "time_iso": "2026-10-19T05:18:36.003000+00:00", "latitude": 11.1229, "longitude": -86.4815, "depth_km": 44.02, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u3a8", "felt": null, "tsunami": 0, "significance": 490, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u38i", "place": "Fiji region", "magnitude": 4.5, "time_ms": 1792362862230, "time_iso": "2026-10-18T22:34:22.230000+00:00", "latitude": -20.9271, "longitude": -178.6587, "depth_km": 551.95, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u38i", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u38g", "place": "129 km SSE of Kokopo, Papua New Guinea", "magnitude": 5.1, "time_ms": 1792362703272, "time_iso": "2026-10-18T22:31:43.272000+00:00", "latitude": -5.4567, "longitude": 152.6162, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u38g", "felt": null, "tsunami": 0, "significance": 509, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u38b", "place": "147 km SSW of Kokopo, Papua New Guinea", "magnitude": 4.7, "time_ms": 1792361173969, "time_iso": "2026-10-18T22:06:13.969000+00:00", "latitude": -5.6049, "longitude": 151.8407, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u38b", "felt": null, "tsunami": 0, "significance": 470, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u37h", "place": "71 km ESE of ‘Ohonua, Tonga", "magnitude": 5.2, "time_ms": 1792351948734, "time_iso": "2026-10-18T19:32:28.734000+00:00", "latitude": -21.541, "longitude": -174.2956, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u37h", "felt": null, "tsunami": 0, "significance": 520, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u36m", "place": "0 km NE of Río Grande, Panama", "magnitude": 4.5, "time_ms": 1792339975030, "time_iso": "2026-10-18T16:12:55.030000+00:00", "latitude": 7.7244, "longitude": -81.3297, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u36m", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u36d", "place": "20 km SW of Sandy Point Town, Saint Kitts and Nevis", "magnitude": 4.7, "time_ms": 1792337747580, "time_iso": "2026-10-18T15:35:47.580000+00:00", "latitude": 17.2531, "longitude": -63.0065, "depth_km": 149.95, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u36d", "felt": null, "tsunami": 0, "significance": 470, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u366", "place": "Carlsberg Ridge", "magnitude": 4.6, "time_ms": 1792333807877, "time_iso": "2026-10-18T14:30:07.877000+00:00", "latitude": 1.452, "longitude": 66.9867, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u366", "felt": null, "tsunami": 0, "significance": 459, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u35l", "place": "Kermadec Islands, New Zealand", "magnitude": 4.5, "time_ms": 1792327342533, "time_iso": "2026-10-18T12:42:22.533000+00:00", "latitude": -30.1265, "longitude": -177.3838, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u35l", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u34e", "place": "55 km NNW of Ruteng, Indonesia", "magnitude": 5.2, "time_ms": 1792310406054, "time_iso": "2026-10-18T08:00:06.054000+00:00", "latitude": -8.1449, "longitude": 120.2734, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u34e", "felt": null, "tsunami": 0, "significance": 520, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u32r", "place": "31 km SE of Kainantu, Papua New Guinea", "magnitude": 4.8, "time_ms": 1792283309111, "time_iso": "2026-10-18T00:28:29.111000+00:00", "latitude": -6.5103, "longitude": 146.0489, "depth_km": 124.07, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u32r", "felt": null, "tsunami": 0, "significance": 480, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u30x", "place": "88 km SSW of Uyuni, Bolivia", "magnitude": 4.6, "time_ms": 1792255965164, "time_iso": "2026-10-17T16:52:45.164000+00:00", "latitude": -21.1752, "longitude": -67.2144, "depth_km": 189.46, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u30x", "felt": null, "tsunami": 0, "significance": 459, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u309", "place": "86 km SW of Brisas Barra de Suchiate, Mexico", "magnitude": 5.2, "time_ms": 1792245574575, "time_iso": "2026-10-17T13:59:34.575000+00:00", "latitude": 14.0469, "longitude": -92.8552, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u309", "felt": null, "tsunami": 0, "significance": 520, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u300", "place": "70 km W of Tambolaka, Indonesia", "magnitude": 4.6, "time_ms": 1792241183796, "time_iso": "2026-10-17T12:46:23.796000+00:00", "latitude": -9.3596, "longitude": 118.5983, "depth_km": 68.93, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u300", "felt": null, "tsunami": 0, "significance": 459, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2zb", "place": "51 km N of Pante Makasar, Timor Leste", "magnitude": 4.6, "time_ms": 1792228060745, "time_iso": "2026-10-17T09:07:40.745000+00:00", "latitude": -8.7339, "longitude": 124.3423, "depth_km": 90.84, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2zb", "felt": null, "tsunami": 0, "significance": 459, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2z9", "place": "110 km NE of Norsup, Vanuatu", "magnitude": 4.8, "time_ms": 1792227591583, "time_iso": "2026-10-17T08:59:51.583000+00:00", "latitude": -15.5117, "longitude": 168.2516, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2z9", "felt": null, "tsunami": 0, "significance": 480, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2yz", "place": "80 km NW of Sola, Vanuatu", "magnitude": 4.5, "time_ms": 1792222802596, "time_iso": "2026-10-17T07:40:02.596000+00:00", "latitude": -13.3461, "longitude": 167.0474, "depth_km": 145.26, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2yz", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2yw", "place": "59 km NNW of Ruteng, Indonesia", "magnitude": 4.5, "time_ms": 1792221648242, "time_iso": "2026-10-17T07:20:48.242000+00:00", "latitude": -8.1086, "longitude": 120.2824, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2yw", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2y1", "place": "48 km WNW of Khuzdar, Pakistan", "magnitude": 5.7, "time_ms": 1792213617657, "time_iso": "2026-10-17T05:06:57.657000+00:00", "latitude": 28.0179, "longitude": 66.1708, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2y1", "felt": null, "tsunami": 0, "significance": 570, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2xs", "place": "196 km SSE of Alo, Wallis and Futuna", "magnitude": 4.8, "time_ms": 1792210745244, "time_iso": "2026-10-17T04:19:05.244000+00:00", "latitude": -16.0441, "longitude": -177.7283, "depth_km": 439.39, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2xs", "felt": null, "tsunami": 0, "significance": 480, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2x7", "place": "115 km SW of Puerto Madero, Mexico", "magnitude": 4.9, "time_ms": 1792198980020, "time_iso": "2026-10-17T01:03:00.020000+00:00", "latitude": 14.0576, "longitude": -93.2479, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2x7", "felt": null, "tsunami": 0, "significance": 490, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2ww", "place": "6 km NNE of Sámi, Greece", "magnitude": 4.6, "time_ms": 1792195070544, "time_iso": "2026-10-16T23:57:50.544000+00:00", "latitude": 38.305, "longitude": 20.6863, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2ww", "felt": null, "tsunami": 0, "significance": 459, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2wn", "place": "12 km SSE of Tebario, Panama", "magnitude": 4.6, "time_ms": 1792190463562, "time_iso": "2026-10-16T22:41:03.562000+00:00", "latitude": 7.6127, "longitude": -80.9354, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2wn", "felt": null, "tsunami": 0, "significance": 459, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2w9", "place": "70 km NNE of Mīnāb, Iran", "magnitude": 4.5, "time_ms": 1792186226101, "time_iso": "2026-10-16T21:30:26.101000+00:00", "latitude": 27.7264, "longitude": 57.3327, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2w9", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2w7", "place": "south of the Fiji Islands", "magnitude": 4.5, "time_ms": 1792185997613, "time_iso": "2026-10-16T21:26:37.613000+00:00", "latitude": -23.6209, "longitude": -179.7966, "depth_km": 535.36, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2w7", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2v8", "place": "off the coast of Ecuador", "magnitude": 5.2, "time_ms": 1792179250597, "time_iso": "2026-10-16T19:34:10.597000+00:00", "latitude": 1.2955, "longitude": -85.2725, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2v8", "felt": null, "tsunami": 0, "significance": 520, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2qn", "place": "41 km NNE of Kilimatinde, Tanzania", "magnitude": 4.6, "time_ms": 1792167445793, "time_iso": "2026-10-16T16:17:25.793000+00:00", "latitude": -5.524, "longitude": 35.1303, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2qn", "felt": null, "tsunami": 0, "significance": 459, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2qf", "place": "186 km SSE of Vilyuchinsk, Russia", "magnitude": 4.7, "time_ms": 1792163327528, "time_iso": "2026-10-16T15:08:47.528000+00:00", "latitude": 51.4073, "longitude": 159.5232, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2qf", "felt": null, "tsunami": 0, "significance": 470, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2qd", "place": "153 km W of Neiafu, Tonga", "magnitude": 4.6, "time_ms": 1792163194084, "time_iso": "2026-10-16T15:06:34.084000+00:00", "latitude": -18.4686, "longitude": -175.4291, "depth_km": 247.72, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2qd", "felt": null, "tsunami": 0, "significance": 459, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2q5", "place": "Auckland Islands, New Zealand region", "magnitude": 5.0, "time_ms": 1792159794288, "time_iso": "2026-10-16T14:09:54.288000+00:00", "latitude": -49.8826, "longitude": 163.4041, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2q5", "felt": null, "tsunami": 0, "significance": 500, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2pw", "place": "51 km ESE of Juradó, Colombia", "magnitude": 4.5, "time_ms": 1792155761211, "time_iso": "2026-10-16T13:02:41.211000+00:00", "latitude": 6.853, "longitude": -77.3681, "depth_km": 25.87, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2pw", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2pp", "place": "10 km SE of Lamitan, Philippines", "magnitude": 4.7, "time_ms": 1792153105421, "time_iso": "2026-10-16T12:18:25.421000+00:00", "latitude": 6.0268, "longitude": 125.7789, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2pp", "felt": null, "tsunami": 0, "significance": 470, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2pl", "place": "119 km SSW of Merizo Village, Guam", "magnitude": 4.9, "time_ms": 1792151839839, "time_iso": "2026-10-16T11:57:19.839000+00:00", "latitude": 12.328, "longitude": 144.1189, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2pl", "felt": null, "tsunami": 0, "significance": 490, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2ph", "place": "7 km WSW of Soconusco, Mexico", "magnitude": 4.8, "time_ms": 1792150784878, "time_iso": "2026-10-16T11:39:44.878000+00:00", "latitude": 15.2777, "longitude": -92.7881, "depth_km": 108.91, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2ph", "felt": null, "tsunami": 0, "significance": 480, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2p2", "place": "31 km ENE of Kinablangan, Philippines", "magnitude": 4.9, "time_ms": 1792142024909, "time_iso": "2026-10-16T09:13:44.909000+00:00", "latitude": 7.8392, "longitude": 126.799, "depth_km": 73.71, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2p2", "felt": null, "tsunami": 0, "significance": 490, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2p5", "place": "southern East Pacific Rise", "magnitude": 4.8, "time_ms": 1792141468861, "time_iso": "2026-10-16T09:04:28.861000+00:00", "latitude": -55.2392, "longitude": -126.4961, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2p5", "felt": null, "tsunami": 0, "significance": 480, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2n4", "place": "95 km SW of Brisas Barra de Suchiate, Mexico", "magnitude": 4.7, "time_ms": 1792125760890, "time_iso": "2026-10-16T04:42:40.890000+00:00", "latitude": 13.934, "longitude": -92.8623, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2n4", "felt": null, "tsunami": 0, "significance": 470, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2mq", "place": "76 km NE of Ozernovskiy, Russia", "magnitude": 6.9, "time_ms": 1792121731925, "time_iso": "2026-10-16T03:35:31.925000+00:00", "latitude": 51.9848, "longitude": 157.2701, "depth_km": 135.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2mq", "felt": null, "tsunami": 0, "significance": 690, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2kz", "place": "44 km SSE of Champerico, Guatemala", "magnitude": 4.5, "time_ms": 1792096765755, "time_iso": "2026-10-15T20:39:25.755000+00:00", "latitude": 13.9013, "longitude": -91.8178, "depth_km": 59.49, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2kz", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2i9", "place": "22 km W of Tamarindo, Costa Rica", "magnitude": 4.5, "time_ms": 1792078838840, "time_iso": "2026-10-15T15:40:38.840000+00:00", "latitude": 10.3031, "longitude": -86.049, "depth_km": 22.78, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2i9", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2i2", "place": "198 km SSE of Vilyuchinsk, Russia", "magnitude": 4.9, "time_ms": 1792076392905, "time_iso": "2026-10-15T14:59:52.905000+00:00", "latitude": 51.3801, "longitude": 159.8474, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2i2", "felt": null, "tsunami": 0, "significance": 490, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2ht", "place": "9 km SSE of Los Asientos, Panama", "magnitude": 4.5, "time_ms": 1792071097166, "time_iso": "2026-10-15T13:31:37.166000+00:00", "latitude": 7.4452, "longitude": -80.0893, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2ht", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2hv", "place": "107 km NNE of Hihifo, Tonga", "magnitude": 5.2, "time_ms": 1792070971862, "time_iso": "2026-10-15T13:29:31.862000+00:00", "latitude": -15.0429, "longitude": -173.4439, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2hv", "felt": null, "tsunami": 0, "significance": 520, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2hr", "place": "114 km SSW of Nikolski, Alaska", "magnitude": 4.7, "time_ms": 1792070186373, "time_iso": "2026-10-15T13:16:26.373000+00:00", "latitude": 52.0024, "longitude": -169.576, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2hr", "felt": null, "tsunami": 0, "significance": 470, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2hp", "place": "157 km W of Sola, Vanuatu", "magnitude": 5.2, "time_ms": 1792069611678, "time_iso": "2026-10-15T13:06:51.678000+00:00", "latitude": -13.8878, "longitude": 166.0921, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2hp", "felt": null, "tsunami": 0, "significance": 520, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2gd", "place": "off the coast of Ecuador", "magnitude": 5.4, "time_ms": 1792063003668, "time_iso": "2026-10-15T11:16:43.668000+00:00", "latitude": 0.9022, "longitude": -85.3587, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2gd", "felt": null, "tsunami": 0, "significance": 540, "status": "reviewed", "mag_type": "mww"}, {"id": "aka2026ukynnb", "place": "43 km NNW of Lake Minchumina, Alaska", "magnitude": 5.6, "time_ms": 1792062421800, "time_iso": "2026-10-15T11:07:01.800000+00:00", "latitude": 64.22, "longitude": -152.746, "depth_km": 4.5, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/aka2026ukynnb", "felt": null, "tsunami": 0, "significance": 560, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2ev", "place": "43 km SSE of Otorohanga, New Zealand", "magnitude": 5.3, "time_ms": 1792041931942, "time_iso": "2026-10-15T05:25:31.942000+00:00", "latitude": -38.5478, "longitude": 175.3814, "depth_km": 286.01, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2ev", "felt": null, "tsunami": 0, "significance": 530, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2er", "place": "67 km N of Namuac, Philippines", "magnitude": 4.6, "time_ms": 1792039272999, "time_iso": "2026-10-15T04:41:12.999000+00:00", "latitude": 19.2179, "longitude": 121.2525, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2er", "felt": null, "tsunami": 0, "significance": 459, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2ec", "place": "36 km E of Safotu, Samoa", "magnitude": 5.1, "time_ms": 1792035389038, "time_iso": "2026-10-15T03:36:29.038000+00:00", "latitude": -13.409, "longitude": -172.0686, "depth_km": 13.21, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2ec", "felt": null, "tsunami": 0, "significance": 509, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2eh", "place": "30 km E of Safotu, Samoa", "magnitude": 4.8, "time_ms": 1792035368430, "time_iso": "2026-10-15T03:36:08.430000+00:00", "latitude": -13.4327, "longitude": -172.1174, "depth_km": 13.47, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2eh", "felt": null, "tsunami": 0, "significance": 480, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2d6", "place": "82 km SSW of Mil’kovo, Russia", "magnitude": 4.5, "time_ms": 1792020059714, "time_iso": "2026-10-14T23:20:59.714000+00:00", "latitude": 54.0004, "longitude": 158.1848, "depth_km": 183.5, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2d6", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u2gk", "place": "central Mid-Atlantic Ridge", "magnitude": 4.7, "time_ms": 1791987441408, "time_iso": "2026-10-14T14:17:21.408000+00:00", "latitude": -0.343, "longitude": -19.2064, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u2gk", "felt": null, "tsunami": 0, "significance": 470, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u28y", "place": "Fiji region", "magnitude": 5.9, "time_ms": 1791974987588, "time_iso": "2026-10-14T10:49:47.588000+00:00", "latitude": -20.9899, "longitude": -178.7711, "depth_km": 585.07, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u28y", "felt": null, "tsunami": 0, "significance": 590, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u28e", "place": "42 km NNE of Kilimatinde, Tanzania", "magnitude": 4.6, "time_ms": 1791969378828, "time_iso": "2026-10-14T09:16:18.828000+00:00", "latitude": -5.4767, "longitude": 35.0428, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u28e", "felt": null, "tsunami": 0, "significance": 459, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u27u", "place": "121 km S of Kokopo, Papua New Guinea", "magnitude": 4.9, "time_ms": 1791959226453, "time_iso": "2026-10-14T06:27:06.453000+00:00", "latitude": -5.443, "longitude": 152.2617, "depth_km": 35.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u27u", "felt": null, "tsunami": 0, "significance": 490, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u27j", "place": "10 km S of La Mesa, Panama", "magnitude": 4.7, "time_ms": 1791954575397, "time_iso": "2026-10-14T05:09:35.397000+00:00", "latitude": 7.5657, "longitude": -80.6021, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u27j", "felt": null, "tsunami": 0, "significance": 470, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u272", "place": "16 km WSW of La Tirana, Chile", "magnitude": 4.9, "time_ms": 1791947469258, "time_iso": "2026-10-14T03:11:09.258000+00:00", "latitude": -20.3552, "longitude": -70.2699, "depth_km": 44.91, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u272", "felt": null, "tsunami": 0, "significance": 490, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u273", "place": "North Atlantic Ocean", "magnitude": 4.8, "time_ms": 1791946934593, "time_iso": "2026-10-14T03:02:14.593000+00:00", "latitude": 5.0056, "longitude": -27.5843, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u273", "felt": null, "tsunami": 0, "significance": 480, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u271", "place": "128 km S of Kokopo, Papua New Guinea", "magnitude": 4.7, "time_ms": 1791946767574, "time_iso": "2026-10-14T02:59:27.574000+00:00", "latitude": -5.4957, "longitude": 152.3942, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u271", "felt": null, "tsunami": 0, "significance": 470, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u26u", "place": "75 km E of Kokopo, Papua New Guinea", "magnitude": 4.6, "time_ms": 1791943934885, "time_iso": "2026-10-14T02:12:14.885000+00:00", "latitude": -4.4488, "longitude": 152.9436, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u26u", "felt": null, "tsunami": 0, "significance": 459, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u26f", "place": "98 km NW of Coquimbo, Chile", "magnitude": 5.0, "time_ms": 1791938205416, "time_iso": "2026-10-14T00:36:45.416000+00:00", "latitude": -29.219, "longitude": -71.9168, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u26f", "felt": null, "tsunami": 0, "significance": 500, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u26c", "place": "93 km NNW of Coquimbo, Chile", "magnitude": 5.1, "time_ms": 1791937847706, "time_iso": "2026-10-14T00:30:47.706000+00:00", "latitude": -29.2155, "longitude": -71.8024, "depth_km": 21.95, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u26c", "felt": null, "tsunami": 0, "significance": 509, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u25i", "place": "5 km NW of Cepitá, Colombia", "magnitude": 4.8, "time_ms": 1791926661135, "time_iso": "2026-10-13T21:24:21.135000+00:00", "latitude": 6.7888, "longitude": -73.0065, "depth_km": 162.21, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u25i", "felt": null, "tsunami": 0, "significance": 480, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u24c", "place": "126 km S of Kokopo, Papua New Guinea", "magnitude": 6.0, "time_ms": 1791917103231, "time_iso": "2026-10-13T18:45:03.231000+00:00", "latitude": -5.4832, "longitude": 152.1364, "depth_km": 20.84, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u24c", "felt": null, "tsunami": 0, "significance": 600, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u23d", "place": "123 km S of Kokopo, Papua New Guinea", "magnitude": 5.1, "time_ms": 1791908895172, "time_iso": "2026-10-13T16:28:15.172000+00:00", "latitude": -5.4453, "longitude": 152.1025, "depth_km": 36.99, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u23d", "felt": null, "tsunami": 0, "significance": 509, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u21y", "place": "8 km SE of Sarangani, Philippines", "magnitude": 4.8, "time_ms": 1791904904242, "time_iso": "2026-10-13T15:21:44.242000+00:00", "latitude": 5.3478, "longitude": 125.5183, "depth_km": 65.7, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u21y", "felt": null, "tsunami": 0, "significance": 480, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u21s", "place": "129 km S of Kokopo, Papua New Guinea", "magnitude": 5.3, "time_ms": 1791902172242, "time_iso": "2026-10-13T14:36:12.242000+00:00", "latitude": -5.5103, "longitude": 152.1283, "depth_km": 29.79, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u21s", "felt": null, "tsunami": 0, "significance": 530, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u21d", "place": "26 km SSW of Zapotillo, Panama", "magnitude": 4.5, "time_ms": 1791895892169, "time_iso": "2026-10-13T12:51:32.169000+00:00", "latitude": 7.7902, "longitude": -81.6085, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u21d", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u214", "place": "central Mid-Atlantic Ridge", "magnitude": 6.8, "time_ms": 1791894187248, "time_iso": "2026-10-13T12:23:07.248000+00:00", "latitude": -0.4085, "longitude": -19.4308, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u214", "felt": null, "tsunami": 0, "significance": 680, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u20z", "place": "180 km SE of Vilyuchinsk, Russia", "magnitude": 4.9, "time_ms": 1791893141519, "time_iso": "2026-10-13T12:05:41.519000+00:00", "latitude": 51.6162, "longitude": 159.9496, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u20z", "felt": null, "tsunami": 0, "significance": 490, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u20i", "place": "71 km SW of Tambolaka, Indonesia", "magnitude": 4.5, "time_ms": 1791884908205, "time_iso": "2026-10-13T09:48:28.205000+00:00", "latitude": -9.9266, "longitude": 118.8246, "depth_km": 35.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u20i", "felt": null, "tsunami": 0, "significance": 450, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u20g", "place": "9 km NE of Boshkengash, Tajikistan", "magnitude": 4.7, "time_ms": 1791884472899, "time_iso": "2026-10-13T09:41:12.899000+00:00", "latitude": 38.5166, "longitude": 68.8922, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u20g", "felt": null, "tsunami": 0, "significance": 470, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u207", "place": "southern Mid-Atlantic Ridge", "magnitude": 5.3, "time_ms": 1791880708325, "time_iso": "2026-10-13T08:38:28.325000+00:00", "latitude": -28.556, "longitude": -12.5205, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u207", "felt": null, "tsunami": 0, "significance": 530, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u200", "place": "63 km W of Bayan Hot, China", "magnitude": 4.6, "time_ms": 1791879304080, "time_iso": "2026-10-13T08:15:04.080000+00:00", "latitude": 38.8294, "longitude": 104.9421, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u200", "felt": null, "tsunami": 0, "significance": 459, "status": "reviewed", "mag_type": "mww"}, {"id": "us6000u1zh", "place": "14 km WNW of Río Grande, Panama", "magnitude": 4.7, "time_ms": 1791873544944, "time_iso": "2026-10-13T06:39:04.944000+00:00", "latitude": 7.7685, "longitude": -81.4531, "depth_km": 10.0, "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u1zh", "felt": null, "tsunami": 0, "significance": 470, "status": "reviewed", "mag_type": "mww"}], "repositories": [{"name": "AutoGPT", "full_name": "Significant-Gravitas/AutoGPT", "stars": 187666, "forks": 41286, "description": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.", "url": "https://github.com/Significant-Gravitas/AutoGPT", "language": "Python", "updated_at": "2026-10-20T00:00:00Z"}, {"name": "markitdown", "full_name": "microsoft/markitdown", "stars": 191164, "forks": 42056, "description": "Python tool for converting files and office documents to Markdown.", "url": "https://github.com/microsoft/markitdown", "language": "Python", "updated_at": "2026-10-20T00:00:00Z"}, {"name": "yt-dlp", "full_name": "yt-dlp/yt-dlp", "stars": 199544, "forks": 43899, "description": "A feature-rich command-line audio/video downloader", "url": "https://github.com/yt-dlp/yt-dlp", "language": "Python", "updated_at": "2026-10-20T00:00:00Z"}, {"name": "Python", "full_name": "TheAlgorithms/Python", "stars": 225411, "forks": 49590, "description": "All Algorithms implemented in Python", "url": "https://github.com/TheAlgorithms/Python", "language": "Python", "updated_at": "2026-10-20T00:00:00Z"}, {"name": "hermes-agent", "full_name": "NousResearch/hermes-agent", "stars": 255336, "forks": 56173, "description": "The agent that grows with you", "url": "https://github.com/NousResearch/hermes-agent", "language": "Python", "updated_at": "2026-10-20T00:00:00Z"}, {"name": "project-based-learning", "full_name": "practical-tutorials/project-based-learning", "stars": 287338, "forks": 63214, "description": "Curated list of project-based tutorials", "url": "https://github.com/practical-tutorials/project-based-learning", "language": "Python", "updated_at": "2026-10-20T00:00:00Z"}, {"name": "awesome-python", "full_name": "vinta/awesome-python", "stars": 328802, "forks": 72336, "description": "The definitive list that answers \"I want to do X in Python, which tool should I use?\"", "url": "https://github.com/vinta/awesome-python", "language": "Python", "updated_at": "2026-10-20T00:00:00Z"}, {"name": "system-design-primer", "full_name": "donnemartin/system-design-primer", "stars": 374826, "forks": 82461, "description": "Learn how to design large-scale systems. Prep for the system design interview.  Includes Anki flashcards.", "url": "https://github.com/donnemartin/system-design-primer", "language": "Python", "updated_at": "2026-10-20T00:00:00Z"}, {"name": "free-programming-books", "full_name": "EbookFoundation/free-programming-books", "stars": 399617, "forks": 87915, "description": ":books: Freely available programming books", "url": "https://github.com/EbookFoundation/free-programming-books", "language": "Python", "updated_at": "2026-10-20T00:00:00Z"}, {"name": "public-apis", "full_name": "public-apis/public-apis", "stars": 490620, "forks": 107936, "description": "A collective list of free APIs", "url": "https://github.com/public-apis/public-apis", "language": "Python", "updated_at": "2026-10-20T00:00:00Z"}], "analytics": {"total_count": 107, "max_magnitude": 6.9, "max_event_place": "76 km NE of Ozernovskiy, Russia", "avg_magnitude": 4.93, "strong_count": 35, "major_count": 5, "shallow_count": 82, "intermediate_count": 20, "deep_count": 5, "most_active_region": "Vanuatu", "tsunami_alerts": 0, "magnitude_bins": {"< 5.0": 72, "5.0 - 5.9": 30, "6.0 - 6.9": 5, "7.0+": 0}, "depth_bins": {"0-35km": 73, "35-70km": 9, "70-150km": 13, "150-300km": 7, "300km+": 5}, "hourly_distribution": {"0": 5, "1": 1, "2": 3, "3": 5, "4": 4, "5": 4, "6": 3, "7": 6, "8": 8, "9": 9, "10": 4, "11": 5, "12": 7, "13": 6, "14": 7, "15": 6, "16": 5, "17": 1, "18": 4, "19": 2, "20": 1, "21": 4, "22": 5, "23": 2}, "latest_event_iso": "2026-10-20T04:20:38.737000+00:00", "oldest_event_iso": "2026-10-13T06:39:04.944000+00:00"}, "freshness": {"generated_at": "2026-11-01T03:03:06.601679+00:00", "usgs_feed": "4.5_week", "usgs_status": "offline_cache", "github_status": "offline_cache", "earthquake_count": 107, "repository_count": 10}}
+  </script>
+
+  <!-- Application Logic -->
+  <script>
+    (function() {
+      "use strict";
+
+      const rawData = JSON.parse(document.getElementById("quakescope-data").textContent);
+      let earthquakes = rawData.earthquakes || [];
+      let repositories = rawData.repositories || [];
+      let freshness = rawData.freshness || {};
+      let useLocalTz = false;
+
+      let mapInstance = null;
+      let overviewMapInstance = null;
+      let mapMarkersLayer = null;
+      let overviewMarkersLayer = null;
+
+      // Table pagination and filtering state
+      let currentPage = 1;
+      const pageSize = 15;
+      let sortCol = "time_ms";
+      let sortAsc = false;
+      let activeFilterSearch = "";
+      let activeFilterMag = 0.0;
+
+      // Magnitude styling helper
+      function getMagColor(mag) {
+        if (mag < 5.0) return "#10b981"; // Minor
+        if (mag < 6.0) return "#f59e0b"; // Moderate
+        if (mag < 7.0) return "#f97316"; // Strong
+        return "#ef4444";                // Major
+      }
+      function getMagBadgeClass(mag) {
+        if (mag < 5.0) return "mag-minor";
+        if (mag < 6.0) return "mag-mod";
+        if (mag < 7.0) return "mag-strong";
+        return "mag-major";
+      }
+
+      // Format timestamp helper
+      function formatTimestamp(timeMs) {
+        if (!timeMs) return "--";
+        const d = new Date(timeMs);
+        if (useLocalTz) {
+          return d.toLocaleString() + " (Local)";
+        }
+        return d.toISOString().replace("T", " ").substring(0, 19) + " UTC";
+      }
+
+      // Initialize Application
+      function init() {
+        setupNavigation();
+        setupControls();
+        renderFreshness();
+        renderKPIs();
+        renderOverviewFeed();
+        renderTable();
+        renderRepositories();
+        initOverviewMap();
+        initFullMap();
+        renderAnalyticsCharts();
+      }
+
+      // Navigation handler
+      function setupNavigation() {
+        const buttons = document.querySelectorAll(".nav-btn");
+        buttons.forEach(btn => {
+          btn.addEventListener("click", () => {
+            const tabId = btn.getAttribute("data-tab");
+            switchTab(tabId);
+          });
+        });
+      }
+
+      function switchTab(tabId) {
+        document.querySelectorAll(".nav-btn").forEach(b => {
+          const match = b.getAttribute("data-tab") === tabId;
+          b.classList.toggle("active", match);
+          b.setAttribute("aria-selected", match ? "true" : "false");
+        });
+
+        document.querySelectorAll(".view-section").forEach(sec => {
+          const match = sec.id === "view-" + tabId;
+          sec.classList.toggle("active", match);
+        });
+
+        // Trigger map invalidateSize on tab switch
+        if (tabId === "map-view" && mapInstance) {
+          setTimeout(() => mapInstance.invalidateSize(), 100);
+        }
+        if (tabId === "overview" && overviewMapInstance) {
+          setTimeout(() => overviewMapInstance.invalidateSize(), 100);
+        }
+        if (tabId === "analytics") {
+          setTimeout(() => {
+            ["chart-mag-dist", "chart-depth-dist", "chart-hourly", "chart-regions"].forEach(id => {
+              if (typeof Plotly !== "undefined") Plotly.Plots.resize(id);
+            });
+          }, 100);
+        }
+        if (tabId === "github-view") {
+          setTimeout(() => {
+            if (typeof Plotly !== "undefined") Plotly.Plots.resize("chart-github-repos");
+          }, 100);
+        }
+      }
+      window.QuakeScopeApp = { switchTab: switchTab, openModal: openModal };
+
+      // Header controls (TZ toggle, refresh, feed selector)
+      function setupControls() {
+        const tzBtn = document.getElementById("btn-tz-toggle");
+        tzBtn.addEventListener("click", () => {
+          useLocalTz = !useLocalTz;
+          document.getElementById("tz-label").textContent = useLocalTz ? "Local" : "UTC";
+          document.querySelectorAll(".col-tz").forEach(el => {
+            el.textContent = useLocalTz ? "Local" : "UTC";
+          });
+          renderOverviewFeed();
+          renderTable();
+          updateMapPopups();
+        });
+
+        const refreshBtn = document.getElementById("btn-refresh");
+        refreshBtn.addEventListener("click", () => {
+          fetchLiveFeed();
+        });
+
+        const feedSelect = document.getElementById("feed-select");
+        feedSelect.addEventListener("change", () => {
+          fetchLiveFeed();
+        });
+
+        // Map filters
+        document.getElementById("map-filter-mag").addEventListener("change", () => {
+          updateMapMarkers();
+        });
+        document.getElementById("map-filter-depth").addEventListener("change", () => {
+          updateMapMarkers();
+        });
+        document.getElementById("btn-reset-map").addEventListener("click", () => {
+          if (mapInstance) mapInstance.setView([20, 0], 2);
+        });
+        document.getElementById("btn-fullscreen-map").addEventListener("click", () => {
+          const elem = document.getElementById("quake-map");
+          if (!document.fullscreenElement) {
+            elem.requestFullscreen().catch(() => {});
+          } else {
+            document.exitFullscreen();
+          }
+        });
+
+        // Explorer filters
+        const searchInput = document.getElementById("explorer-search");
+        searchInput.addEventListener("input", (e) => {
+          activeFilterSearch = e.target.value.toLowerCase().trim();
+          currentPage = 1;
+          renderTable();
+        });
+
+        const magSelect = document.getElementById("explorer-filter-mag");
+        magSelect.addEventListener("change", (e) => {
+          activeFilterMag = parseFloat(e.target.value) || 0.0;
+          currentPage = 1;
+          renderTable();
+        });
+
+        document.getElementById("btn-prev-page").addEventListener("click", () => {
+          if (currentPage > 1) {
+            currentPage--;
+            renderTable();
+          }
+        });
+        document.getElementById("btn-next-page").addEventListener("click", () => {
+          const totalFiltered = getFilteredEarthquakes().length;
+          if (currentPage * pageSize < totalFiltered) {
+            currentPage++;
+            renderTable();
+          }
+        });
+
+        // Table column sorting
+        document.querySelectorAll(".data-table th[data-sort]").forEach(th => {
+          th.addEventListener("click", () => {
+            const col = th.getAttribute("data-sort");
+            if (sortCol === col) {
+              sortAsc = !sortAsc;
+            } else {
+              sortCol = col;
+              sortAsc = false;
+            }
+            document.querySelectorAll(".data-table th").forEach(h => h.classList.remove("sorted-asc", "sorted-desc"));
+            th.classList.add(sortAsc ? "sorted-asc" : "sorted-desc");
+            renderTable();
+          });
+        });
+
+        // Modal close
+        document.getElementById("btn-close-modal").addEventListener("click", closeModal);
+        document.getElementById("event-modal").addEventListener("click", (e) => {
+          if (e.target.id === "event-modal") closeModal();
+        });
+
+        // Exports
+        document.getElementById("btn-export-csv").addEventListener("click", exportCSV);
+        document.getElementById("btn-export-geojson").addEventListener("click", exportGeoJSON);
+      }
+
+      // Freshness text
+      function renderFreshness() {
+        const genTime = freshness.generated_at ? formatTimestamp(Date.parse(freshness.generated_at)) : "Latest Snapshot";
+        const feedLabel = freshness.usgs_feed || "Past 7 Days M4.5+";
+        const statusText = "Generated " + genTime + " &bull; " + feedLabel;
+        document.getElementById("freshness-text").innerHTML = statusText;
+        document.getElementById("record-count-badge").textContent = earthquakes.length + " events tracked";
+      }
+
+      // KPIs
+      function renderKPIs() {
+        const total = earthquakes.length;
+        document.getElementById("kpi-total").textContent = total.toLocaleString();
+
+        if (total === 0) {
+          document.getElementById("kpi-max-mag").textContent = "N/A";
+          document.getElementById("kpi-max-place").textContent = "No data";
+          document.getElementById("kpi-avg-mag").textContent = "N/A";
+          document.getElementById("kpi-strong").textContent = "0";
+          document.getElementById("kpi-shallow").textContent = "0";
+          document.getElementById("kpi-active-region").textContent = "None";
+          return;
+        }
+
+        let maxMag = -99;
+        let maxPlace = "";
+        let magSum = 0;
+        let strongCount = 0;
+        let shallowCount = 0;
+        const regionCounts = {};
+
+        earthquakes.forEach(e => {
+          const m = e.magnitude;
+          magSum += m;
+          if (m > maxMag) {
+            maxMag = m;
+            maxPlace = e.place;
+          }
+          if (m >= 5.0) strongCount++;
+          if (e.depth_km < 70) shallowCount++;
+
+          const region = e.place.includes(",") ? e.place.split(",").pop().trim() : e.place;
+          regionCounts[region] = (regionCounts[region] || 0) + 1;
+        });
+
+        const avgMag = (magSum / total).toFixed(2);
+        let topRegion = "Global";
+        let topCount = 0;
+        for (const r in regionCounts) {
+          if (regionCounts[r] > topCount) {
+            topCount = regionCounts[r];
+            topRegion = r;
+          }
+        }
+
+        document.getElementById("kpi-max-mag").textContent = maxMag.toFixed(1);
+        document.getElementById("kpi-max-place").textContent = maxPlace;
+        document.getElementById("kpi-avg-mag").textContent = avgMag;
+        document.getElementById("kpi-strong").textContent = strongCount.toLocaleString();
+        document.getElementById("kpi-shallow").textContent = shallowCount.toLocaleString();
+        document.getElementById("kpi-active-region").textContent = topRegion;
+      }
+
+      // Overview recent earthquakes feed
+      function renderOverviewFeed() {
+        const container = document.getElementById("recent-feed-list");
+        container.innerHTML = "";
+        const recent = earthquakes.slice(0, 10);
+
+        if (recent.length === 0) {
+          container.innerHTML = "<div style='color: var(--text-dim); padding: 1rem;'>No events available.</div>";
+          return;
+        }
+
+        recent.forEach(e => {
+          const item = document.createElement("div");
+          item.style.cssText = "background: var(--bg-card); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; cursor: pointer;";
+          item.innerHTML = `
+            <div>
+              <div style="font-weight: 600; font-size: 0.84rem; color: #fff;">${escapeHtml(e.place)}</div>
+              <div style="font-size: 0.74rem; color: var(--text-dim);">${formatTimestamp(e.time_ms)} &bull; ${e.depth_km} km depth</div>
+            </div>
+            <span class="mag-badge ${getMagBadgeClass(e.magnitude)}">M ${e.magnitude.toFixed(1)}</span>
+          `;
+          item.addEventListener("click", () => openModal(e));
+          container.appendChild(item);
+        });
+      }
+
+      // Filtering logic for Explorer
+      function getFilteredEarthquakes() {
+        return earthquakes.filter(e => {
+          if (activeFilterMag > 0 && e.magnitude < activeFilterMag) return false;
+          if (activeFilterSearch) {
+            const place = (e.place || "").toLowerCase();
+            const id = (e.id || "").toLowerCase();
+            if (!place.includes(activeFilterSearch) && !id.includes(activeFilterSearch)) {
+              return false;
+            }
+          }
+          return true;
+        });
+      }
+
+      // Table rendering
+      function renderTable() {
+        const tbody = document.getElementById("explorer-table-body");
+        tbody.innerHTML = "";
+
+        const filtered = getFilteredEarthquakes();
+
+        // Sort
+        filtered.sort((a, b) => {
+          let valA = a[sortCol];
+          let valB = b[sortCol];
+          if (typeof valA === "string") valA = valA.toLowerCase();
+          if (typeof valB === "string") valB = valB.toLowerCase();
+          if (valA < valB) return sortAsc ? -1 : 1;
+          if (valA > valB) return sortAsc ? 1 : -1;
+          return 0;
+        });
+
+        const total = filtered.length;
+        const start = (currentPage - 1) * pageSize;
+        const pageData = filtered.slice(start, start + pageSize);
+
+        if (pageData.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 2rem; color: var(--text-dim);">No earthquakes match the current filters.</td></tr>';
+        } else {
+          pageData.forEach(e => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td><span class="mag-badge ${getMagBadgeClass(e.magnitude)}">M ${e.magnitude.toFixed(1)}</span></td>
+              <td style="font-weight: 500;">${escapeHtml(e.place)}</td>
+              <td style="font-family: var(--font-mono); font-size: 0.8rem;">${formatTimestamp(e.time_ms)}</td>
+              <td style="font-family: var(--font-mono);">${e.depth_km}</td>
+              <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">${e.latitude}, ${e.longitude}</td>
+              <td><button class="btn" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">Details</button></td>
+            `;
+            tr.querySelector("button").addEventListener("click", () => openModal(e));
+            tbody.appendChild(tr);
+          });
+        }
+
+        // Update pagination text
+        const end = Math.min(start + pageSize, total);
+        document.getElementById("pagination-info").textContent = `Showing ${total > 0 ? start + 1 : 0}-${end} of ${total.toLocaleString()} events`;
+        document.getElementById("btn-prev-page").disabled = currentPage <= 1;
+        document.getElementById("btn-next-page").disabled = end >= total;
+      }
+
+      // Repositories
+      function renderRepositories() {
+        const container = document.getElementById("repo-cards-container");
+        container.innerHTML = "";
+
+        if (repositories.length === 0) return;
+
+        const top = repositories[0];
+        document.getElementById("kpi-top-repo").textContent = top.name;
+        document.getElementById("kpi-top-repo-stars").textContent = `${top.stars.toLocaleString()} stars`;
+
+        const totalStars = repositories.reduce((acc, r) => acc + r.stars, 0);
+        document.getElementById("kpi-total-stars").textContent = totalStars.toLocaleString();
+
+        repositories.forEach(r => {
+          const card = document.createElement("div");
+          card.className = "repo-card";
+          card.innerHTML = `
+            <div>
+              <div class="repo-header">
+                <a href="${escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer" class="repo-name">${escapeHtml(r.full_name)}</a>
+                <span style="font-size: 0.72rem; padding: 0.15rem 0.4rem; background: rgba(14, 165, 233, 0.15); color: var(--primary); border-radius: 4px;">${escapeHtml(r.language)}</span>
+              </div>
+              <p class="repo-desc">${escapeHtml(r.description)}</p>
+            </div>
+            <div class="repo-meta">
+              <span class="repo-stat">⭐ ${r.stars.toLocaleString()}</span>
+              <span class="repo-stat">🍴 ${r.forks.toLocaleString()}</span>
+              <a href="${escapeHtml(r.url)}" target="_blank" rel="noopener noreferrer" style="margin-left: auto; font-size: 0.78rem;">Visit &rarr;</a>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      // Overview Map Preview
+      function initOverviewMap() {
+        const el = document.getElementById("overview-map");
+        if (!el || typeof L === "undefined") return;
+
+        overviewMapInstance = L.map("overview-map", {
+          center: [20, 0],
+          zoom: 1,
+          minZoom: 1,
+          maxZoom: 8,
+          zoomControl: false,
+          attributionControl: false
+        });
+
+        L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+          subdomains: "abcd",
+          maxZoom: 19
+        }).addTo(overviewMapInstance);
+
+        overviewMarkersLayer = L.layerGroup().addTo(overviewMapInstance);
+        renderOverviewMarkers();
+      }
+
+      function renderOverviewMarkers() {
+        if (!overviewMarkersLayer) return;
+        overviewMarkersLayer.clearLayers();
+
+        earthquakes.slice(0, 80).forEach(e => {
+          const color = getMagColor(e.magnitude);
+          const radius = Math.max(3, Math.min(14, (e.magnitude - 3.5) * 4));
+          const circle = L.circleMarker([e.latitude, e.longitude], {
+            radius: radius,
+            fillColor: color,
+            color: "#fff",
+            weight: 0.8,
+            opacity: 0.9,
+            fillOpacity: 0.75
+          });
+          overviewMarkersLayer.addLayer(circle);
+        });
+      }
+
+      // Full Live Map
+      function initFullMap() {
+        const el = document.getElementById("quake-map");
+        if (!el || typeof L === "undefined") return;
+
+        mapInstance = L.map("quake-map", {
+          center: [20, 0],
+          zoom: 2,
+          minZoom: 2,
+          maxZoom: 14,
+          worldCopyJump: true
+        });
+
+        const darkLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+          attribution: '&copy; <a href="https://carto.com/">CARTO</a> &bull; &copy; OpenStreetMap contributors',
+          subdomains: "abcd",
+          maxZoom: 19
+        }).addTo(mapInstance);
+
+        const osmLayer = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: '&copy; OpenStreetMap contributors'
+        });
+
+        const satelliteLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+          attribution: 'Tiles &copy; Esri'
+        });
+
+        L.control.layers({
+          "Dark Matter": darkLayer,
+          "OpenStreetMap": osmLayer,
+          "Satellite Imagery": satelliteLayer
+        }).addTo(mapInstance);
+
+        mapMarkersLayer = L.layerGroup().addTo(mapInstance);
+
+        mapInstance.on("mousemove", (e) => {
+          document.getElementById("map-coords").textContent = `Lat: ${e.latlng.lat.toFixed(4)}, Lon: ${e.latlng.lng.toFixed(4)}`;
+        });
+
+        updateMapMarkers();
+      }
+
+      function updateMapMarkers() {
+        if (!mapMarkersLayer) return;
+        mapMarkersLayer.clearLayers();
+
+        const magThreshold = parseFloat(document.getElementById("map-filter-mag").value) || 0.0;
+        const depthFilter = document.getElementById("map-filter-depth").value;
+
+        earthquakes.forEach(e => {
+          if (e.magnitude < magThreshold) return;
+          if (depthFilter === "shallow" && e.depth_km >= 70) return;
+          if (depthFilter === "intermediate" && (e.depth_km < 70 || e.depth_km >= 300)) return;
+          if (depthFilter === "deep" && e.depth_km < 300) return;
+
+          const color = getMagColor(e.magnitude);
+          const radius = Math.max(4, Math.min(18, (e.magnitude - 3.0) * 3.5));
+
+          const marker = L.circleMarker([e.latitude, e.longitude], {
+            radius: radius,
+            fillColor: color,
+            color: "#ffffff",
+            weight: 1,
+            opacity: 0.9,
+            fillOpacity: 0.8
+          });
+
+          const popupContent = `
+            <div class="popup-box">
+              <span class="popup-mag" style="background: ${color}; color: #fff;">M ${e.magnitude.toFixed(1)}</span>
+              <div class="popup-title">${escapeHtml(e.place)}</div>
+              <div class="popup-row"><span>Time:</span> <strong>${formatTimestamp(e.time_ms)}</strong></div>
+              <div class="popup-row"><span>Depth:</span> <strong>${e.depth_km} km</strong></div>
+              <div class="popup-row"><span>Coords:</span> <strong>${e.latitude}, ${e.longitude}</strong></div>
+              ${e.url ? `<a href="${escapeHtml(e.url)}" target="_blank" rel="noopener noreferrer" class="popup-btn">Open Official USGS Page &rarr;</a>` : ""}
+            </div>
+          `;
+          marker.bindPopup(popupContent);
+          mapMarkersLayer.addLayer(marker);
+        });
+      }
+
+      function updateMapPopups() {
+        updateMapMarkers();
+      }
+
+      // Plotly Analytics Charts
+      function renderAnalyticsCharts() {
+        if (typeof Plotly === "undefined") return;
+
+        const darkLayout = {
+          paper_bgcolor: "transparent",
+          plot_bgcolor: "transparent",
+          font: { color: "#94a3b8", family: "sans-serif", size: 11 },
+          margin: { l: 45, r: 20, t: 30, b: 40 },
+          xaxis: { gridcolor: "rgba(255,255,255,0.06)", zerolinecolor: "rgba(255,255,255,0.1)" },
+          yaxis: { gridcolor: "rgba(255,255,255,0.06)", zerolinecolor: "rgba(255,255,255,0.1)" }
+        };
+
+        // 1. Magnitude Distribution
+        const mags = earthquakes.map(e => e.magnitude);
+        Plotly.newPlot("chart-mag-dist", [{
+          x: mags,
+          type: "histogram",
+          marker: { color: "#0ea5e9", opacity: 0.85 },
+          autobinx: false,
+          xbins: { start: 4.0, end: 9.0, size: 0.2 }
+        }], Object.assign({}, darkLayout, {
+          xaxis: { title: "Magnitude", gridcolor: "rgba(255,255,255,0.06)" },
+          yaxis: { title: "Event Count", gridcolor: "rgba(255,255,255,0.06)" }
+        }), { responsive: true, displayModeBar: false });
+
+        // 2. Depth Distribution
+        const depths = earthquakes.map(e => e.depth_km);
+        Plotly.newPlot("chart-depth-dist", [{
+          x: depths,
+          type: "histogram",
+          marker: { color: "#14b8a6", opacity: 0.85 },
+          nbinsx: 25
+        }], Object.assign({}, darkLayout, {
+          xaxis: { title: "Depth (km)", gridcolor: "rgba(255,255,255,0.06)" },
+          yaxis: { title: "Event Count", gridcolor: "rgba(255,255,255,0.06)" }
+        }), { responsive: true, displayModeBar: false });
+
+        // 3. Hourly UTC activity
+        const hours = Array.from({ length: 24 }, (_, i) => i);
+        const hourlyCounts = Array(24).fill(0);
+        earthquakes.forEach(e => {
+          const h = new Date(e.time_ms).getUTCHours();
+          hourlyCounts[h]++;
+        });
+        Plotly.newPlot("chart-hourly", [{
+          x: hours.map(h => `${h}:00`),
+          y: hourlyCounts,
+          type: "bar",
+          marker: { color: "#f59e0b", opacity: 0.85 }
+        }], Object.assign({}, darkLayout, {
+          xaxis: { title: "UTC Hour", gridcolor: "rgba(255,255,255,0.06)" },
+          yaxis: { title: "Earthquakes", gridcolor: "rgba(255,255,255,0.06)" }
+        }), { responsive: true, displayModeBar: false });
+
+        // 4. Regional breakdown
+        const regionMap = {};
+        earthquakes.forEach(e => {
+          const r = e.place.includes(",") ? e.place.split(",").pop().trim() : e.place;
+          regionMap[r] = (regionMap[r] || 0) + 1;
+        });
+        const sortedRegions = Object.entries(regionMap).sort((a, b) => b[1] - a[1]).slice(0, 10);
+        Plotly.newPlot("chart-regions", [{
+          x: sortedRegions.map(i => i[1]),
+          y: sortedRegions.map(i => i[0]),
+          type: "bar",
+          orientation: "h",
+          marker: { color: "#38bdf8", opacity: 0.85 }
+        }], Object.assign({}, darkLayout, {
+          margin: { l: 140, r: 20, t: 20, b: 40 },
+          yaxis: { autorange: "reversed", gridcolor: "rgba(255,255,255,0.06)" }
+        }), { responsive: true, displayModeBar: false });
+
+        // 5. GitHub repos chart
+        if (repositories.length > 0) {
+          const sortedRepos = [...repositories].sort((a, b) => a.stars - b.stars);
+          Plotly.newPlot("chart-github-repos", [{
+            x: sortedRepos.map(r => r.stars),
+            y: sortedRepos.map(r => r.name),
+            type: "bar",
+            orientation: "h",
+            marker: { color: "#6366f1" },
+            hovertext: sortedRepos.map(r => `${r.full_name}: ${r.stars.toLocaleString()} stars`),
+            hoverinfo: "text"
+          }], Object.assign({}, darkLayout, {
+            margin: { l: 150, r: 20, t: 20, b: 40 },
+            xaxis: { title: "Star Count", gridcolor: "rgba(255,255,255,0.06)" }
+          }), { responsive: true, displayModeBar: false });
+        }
+      }
+
+      // Live Fetcher connecting directly to USGS CORS endpoint
+      async function fetchLiveFeed() {
+        const feedKey = document.getElementById("feed-select").value;
+        const feedUrls = {
+          "4.5_week": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_week.geojson",
+          "2.5_week": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.geojson",
+          "4.5_day": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_day.geojson",
+          "4.5_month": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_month.geojson"
+        };
+
+        const targetUrl = feedUrls[feedKey] || feedUrls["4.5_week"];
+        const refreshIcon = document.getElementById("refresh-icon");
+        refreshIcon.style.display = "inline-block";
+        refreshIcon.style.animation = "spin 1s infinite linear";
+
+        try {
+          const resp = await fetch(targetUrl);
+          if (!resp.ok) throw new Error("HTTP error " + resp.status);
+          const data = await resp.json();
+
+          if (!data.features) throw new Error("Missing features list");
+
+          const parsed = [];
+          data.features.forEach(f => {
+            if (!f.properties || !f.geometry || !f.geometry.coordinates) return;
+            const coords = f.geometry.coordinates;
+            const mag = f.properties.mag;
+            if (mag === null || mag === undefined || coords.length < 3) return;
+
+            parsed.push({
+              id: f.id || `eq-${coords[1]}-${coords[0]}`,
+              place: f.properties.place || "Unknown region",
+              magnitude: parseFloat(mag),
+              time_ms: f.properties.time,
+              time_iso: new Date(f.properties.time).toISOString(),
+              latitude: parseFloat(coords[1]),
+              longitude: parseFloat(coords[0]),
+              depth_km: parseFloat(coords[2]),
+              url: f.properties.url || "",
+              felt: f.properties.felt,
+              tsunami: f.properties.tsunami || 0,
+              significance: f.properties.sig || 0,
+              status: f.properties.status || "reviewed"
+            });
+          });
+
+          parsed.sort((a, b) => b.time_ms - a.time_ms);
+          earthquakes = parsed;
+          freshness.generated_at = new Date().toISOString();
+          freshness.usgs_feed = feedKey;
+
+          document.getElementById("live-dot").classList.remove("stale");
+          renderFreshness();
+          renderKPIs();
+          renderOverviewFeed();
+          renderTable();
+          renderOverviewMarkers();
+          updateMapMarkers();
+          renderAnalyticsCharts();
+
+        } catch (err) {
+          console.warn("Live USGS fetch failed, retaining previous dataset:", err);
+          document.getElementById("live-dot").classList.add("stale");
+          document.getElementById("freshness-text").innerHTML += " &bull; <span style='color: var(--mag-mod);'>Direct update unavailable (showing snapshot)</span>";
+        } finally {
+          refreshIcon.style.animation = "none";
+        }
+      }
+
+      // Modal inspector
+      function openModal(eq) {
+        document.getElementById("modal-event-title").textContent = `M ${eq.magnitude.toFixed(1)} — ${eq.place}`;
+        document.getElementById("modal-mag").textContent = eq.magnitude.toFixed(2);
+        document.getElementById("modal-depth").textContent = `${eq.depth_km} km`;
+        document.getElementById("modal-place").textContent = eq.place;
+        document.getElementById("modal-time").textContent = formatTimestamp(eq.time_ms);
+        document.getElementById("modal-coords").textContent = `Lat ${eq.latitude}, Lon ${eq.longitude}`;
+        document.getElementById("modal-felt").textContent = eq.felt !== null && eq.felt !== undefined ? `${eq.felt} felt reports` : "None reported";
+        document.getElementById("modal-tsunami").textContent = eq.tsunami === 1 ? "⚠️ Tsunami Warning Issued" : "No Tsunami Threat";
+        document.getElementById("modal-usgs-link").href = eq.url || "#";
+        document.getElementById("event-modal").classList.add("open");
+      }
+
+      function closeModal() {
+        document.getElementById("event-modal").classList.remove("open");
+      }
+
+      // Export helpers
+      function exportCSV() {
+        const filtered = getFilteredEarthquakes();
+        const headers = ["id", "magnitude", "place", "time_utc", "latitude", "longitude", "depth_km", "tsunami", "felt_reports", "usgs_url"];
+        const rows = [headers.join(",")];
+
+        filtered.forEach(e => {
+          const safePlace = '"' + (e.place || "").replace(/"/g, '""') + '"';
+          const r = [
+            e.id,
+            e.magnitude,
+            safePlace,
+            new Date(e.time_ms).toISOString(),
+            e.latitude,
+            e.longitude,
+            e.depth_km,
+            e.tsunami || 0,
+            e.felt || "",
+            e.url || ""
+          ];
+          rows.push(r.join(","));
+        });
+
+        const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+        downloadBlob(blob, `quakescope_export_${Date.now()}.csv`);
+      }
+
+      function exportGeoJSON() {
+        const filtered = getFilteredEarthquakes();
+        const geojson = {
+          type: "FeatureCollection",
+          metadata: {
+            generated: Date.now(),
+            title: "QuakeScope Export",
+            count: filtered.length
+          }},
+          features: filtered.map(e => ({
+            type: "Feature",
+            id: e.id,
+            geometry: {
+              type: "Point",
+              coordinates: [e.longitude, e.latitude, e.depth_km]
+            },
+            properties: {
+              mag: e.magnitude,
+              place: e.place,
+              time: e.time_ms,
+              url: e.url,
+              felt: e.felt,
+              tsunami: e.tsunami
+            }
+          }))
+        };
+
+        const blob = new Blob([JSON.stringify(geojson, null, 2)], { type: "application/geo+json;charset=utf-8;" });
+        downloadBlob(blob, `quakescope_export_${Date.now()}.geojson`);
+      }
+
+      function downloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      function escapeHtml(str) {
+        if (!str) return "";
+        return String(str)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;")
+          .replace(/'/g, "&#039;");
+      }
+
+      // Boot application
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+      } else {
+        init();
+      }
+
+    })();
+  </script>
 </body>
 </html>

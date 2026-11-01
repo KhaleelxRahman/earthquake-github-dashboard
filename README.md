@@ -1,50 +1,168 @@
-# Live Data Pipeline & Interactive Dashboard
+# QuakeScope — Global Earthquake Intelligence
 
-A beginner-friendly Python script that fetches recent significant earthquakes
-from the USGS and popular Python repositories from GitHub, then combines the
-results in an interactive Plotly dashboard.
+[![Deploy QuakeScope to GitHub Pages](https://github.com/KhaleelxRahman/earthquake-github-dashboard/actions/workflows/deploy-pages.yml/badge.svg)](https://github.com/KhaleelxRahman/earthquake-github-dashboard/actions/workflows/deploy-pages.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-teal.svg)](LICENSE)
+[![Python: 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/)
 
-## Live dashboard
+**QuakeScope** is an interactive, professional-grade global earthquake intelligence and geospatial analytics platform. It ingests verified seismic telemetry from the **United States Geological Survey (USGS)** and open-source software trends from the **GitHub REST API**, transforming raw data into an accessible, responsive dashboard with real-time browser refresh capabilities.
 
-View the hosted dashboard at
-https://mohduzairali1710-bit.github.io/earthquake-github-dashboard/.
-GitHub Pages publishes `index.html` after each push
-to the `main` branch.
+---
 
-## What it does
+## Live Dashboard
 
-- Fetches M4.5+ earthquakes from the USGS GeoJSON feed for the past seven days.
-- Fetches the ten most-starred repositories tagged as Python from GitHub.
-- Cleans the API responses into Pandas DataFrames and reports incomplete entries.
-- Builds a world map with magnitude-scaled, magnitude-colored earthquake markers.
-- Builds a horizontal repository star chart with descriptions and clickable links.
-- Saves both charts together in `index.html`.
+Explore the hosted application on GitHub Pages:  
+👉 **[https://KhaleelxRahman.github.io/earthquake-github-dashboard/](https://KhaleelxRahman.github.io/earthquake-github-dashboard/)**
 
-## Requirements
+---
 
-- Python 3.10 or newer
-- Internet access to reach the USGS and GitHub APIs
+## What It Does & Does Not Do
 
-## Setup
+### What It Does
+* **Interactive Geospatial Visualization**: Global vector map powered by Leaflet.js with CartoDB Dark Matter, OpenStreetMap, and Esri Satellite basemaps.
+* **Magnitude-Scaled & Colored Telemetry**: Visualizes earthquakes with magnitude-scaled markers and color indicators (Minor, Moderate, Strong, Major) with pulse animations for significant events.
+* **Dual-Layer Ingestion**: Combines pre-rendered build snapshots for zero-latency initial page loads with direct client-side browser polling to the USGS CORS endpoints.
+* **Advanced Analytics**: Interactive Plotly distributions for earthquake magnitude, focal depth, UTC hourly frequency, and regional activity rankings.
+* **Accessible Earthquake Explorer**: Searchable, multi-column sortable table with pagination, event detail inspector modal, and client-side **RFC 4180 CSV** and **GeoJSON** export.
+* **GitHub Repository Intelligence**: Tracks popular Python repositories with stars, forks, and interactive bar chart rankings.
+* **Zero-Data-Loss Architecture**: Atomic file writing, retry mechanisms with exponential backoff, and automatic fallback to verified snapshots prevent pipeline failures from wiping out working dashboards.
 
-Open a terminal in this project folder and create a virtual environment:
+### What It Does Not Do
+* **No AI Earthquake Predictions**: Earthquakes cannot be predicted. QuakeScope reports historical and real-time observed telemetry provided by scientific seismic monitoring networks.
+* **No Closed APIs or Paid Dependencies**: Operates entirely with open-source mapping and public science endpoints.
 
+---
+
+## Platform Architecture
+
+```
++-------------------------------------------------------------+
+|                      DATA SOURCES                           |
+|   USGS GeoJSON API (Past 7 Days M4.5+ / M2.5+ / All)       |
+|   GitHub Search API (Popular Python Repositories)           |
++------------------------------+------------------------------+
+                               |
+                               v
++-------------------------------------------------------------+
+|              PYTHON DATA PIPELINE & BUILD SERVICE           |
+|  - Bounded Retries with Exponential Backoff                 |
+|  - Strict Geospatial Schema & Coordinate Validation          |
+|  - Safe Atomic File Operations & Fallback Cache             |
+|  - Output Generation into `_site/` and `index.html`         |
+|  - Automated Test Suite Gate (21 Unit & Integration Tests)  |
++------------------------------+------------------------------+
+                               |
+                               v
++-------------------------------------------------------------+
+|             CLIENT-SIDE QUAKESCOPE WEB PLATFORM             |
+|  - Dark Navy / Charcoal Scientific Analytics Theme          |
+|  - Interactive Leaflet.js Map + Layer Toggles               |
+|  - Interactive Plotly Visualizations & Hourly Activity      |
+|  - Real-Time Search, Filtering, and Pagination               |
+|  - Client-Side Live Refresh (USGS CORS Direct Fetch)        |
+|  - Client-Side CSV & GeoJSON Export                         |
+|  - GitHub Repository Intelligence Module                    |
++-------------------------------------------------------------+
+```
+
+---
+
+## Technology Stack
+
+* **Language**: Python 3.10+ (tested on Python 3.11, 3.12, 3.13)
+* **Data Processing**: Pandas, Requests, Python Standard Library (`unittest`, `json`, `pathlib`)
+* **Mapping**: Leaflet.js 1.9.4 with CartoDB Dark Matter, OpenStreetMap, and Esri World Imagery
+* **Data Visualization**: Plotly.js 2.29.1
+* **Frontend**: Semantic HTML5, CSS3 Custom Properties (Dark Navy Theme), Vanilla ES6+ JavaScript
+* **CI/CD**: GitHub Actions deploying to GitHub Pages
+
+---
+
+## Local Setup & Run
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/KhaleelxRahman/earthquake-github-dashboard.git
+cd earthquake-github-dashboard
+```
+
+### 2. Set Up Virtual Environment
+
+#### Windows PowerShell:
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
-Install the packages:
-
-```powershell
-python -m pip install -r requirements.txt
+#### macOS / Linux:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
-## Run
-
-```powershell
+### 3. Run the Data Pipeline
+```bash
+# Standard run (fetches live data, falls back to cache if offline)
 python data_pipeline.py
+
+# Force offline build using verified baseline
+python data_pipeline.py --offline
+
+# Validate output integrity without modifying files
+python data_pipeline.py --validate-only
 ```
 
-Open `index.html` in a web browser to explore the charts. The GitHub API
-is used without authentication, so its public rate limit applies.
+Open `index.html` in your web browser to explore the dashboard locally.
+
+---
+
+## Running the Automated Test Suite
+
+QuakeScope includes 21 comprehensive unit and integration tests that run completely offline:
+
+```bash
+# Run tests with Python's built-in test runner
+python -m unittest discover -s tests -v
+
+# Or using pytest if installed
+pytest -v
+```
+
+All tests validate coordinate ranges, data sanitization, empty responses, malformed records, rate-limit recovery, and atomic writing.
+
+---
+
+## GitHub Pages Deployment
+
+The repository includes an automated workflow in `.github/workflows/deploy-pages.yml` that:
+1. Runs the automated test suite.
+2. Ingests fresh data from the USGS and GitHub APIs.
+3. Builds the production site into an isolated `_site/` directory.
+4. Validates the build output.
+5. Deploys the artifact to GitHub Pages.
+6. Automatically refreshes every 6 hours via scheduled cron (`cron: '0 */6 * * *'`).
+
+### One-Time Manual Setup in GitHub:
+1. Go to your repository on GitHub: `https://github.com/KhaleelxRahman/earthquake-github-dashboard`.
+2. Click **Settings** &rarr; **Pages**.
+3. Under **Build and deployment** &rarr; **Source**, select **GitHub Actions**.
+4. Push to `main` or trigger **Deploy QuakeScope to GitHub Pages** under the **Actions** tab.
+
+---
+
+## Data Sources & Attribution
+
+* **Earthquake Telemetry**: [USGS Earthquake Hazards Program](https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php). Data is in the public domain.
+* **Repository Telemetry**: [GitHub REST API](https://docs.github.com/en/rest).
+* **Map Tiles**: [CARTO Dark Matter](https://carto.com/basemaps/), [OpenStreetMap](https://www.openstreetmap.org/), and [Esri](https://www.esri.com/).
+
+See [docs/DATA_SOURCES.md](docs/DATA_SOURCES.md) for endpoint details and rate-limit specifications.
+
+---
+
+## License
+
+This project is licensed under the [MIT License](LICENSE) &copy; 2026 Khaleel Rahman.
