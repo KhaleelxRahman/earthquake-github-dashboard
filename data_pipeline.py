@@ -114,8 +114,8 @@ def atomic_write_dashboard(html_content: str, destination_path: Path) -> None:
             raise ValueError(f"Temporary output failed integrity validation: {tmp_path}")
 
         # Atomic replacement
-        if destination_path.exists():
-            # Create a backup of the previous good file
+        if destination_path.exists() and destination_path.resolve() == DEFAULT_OUTPUT_FILE.resolve():
+            # Create a backup of the previous good root file
             bak_path = destination_path.with_suffix(".html.bak")
             try:
                 shutil.copy2(destination_path, bak_path)
@@ -224,6 +224,16 @@ def run_pipeline(
 
     for target in target_files:
         atomic_write_dashboard(html_output, target)
+        target_dir = target.parent
+        # Copy static assets if target is not the project root
+        if target_dir.resolve() != BASE_DIR.resolve():
+            for asset in ("favicon.ico", "favicon.svg"):
+                asset_src = BASE_DIR / asset
+                if asset_src.exists():
+                    try:
+                        shutil.copy2(asset_src, target_dir / asset)
+                    except Exception as exc:
+                        logger.warning("Could not copy asset %s to %s: %s", asset, target_dir, exc)
 
     logger.info("Pipeline completed successfully.")
     return 0

@@ -84,6 +84,48 @@ class TestPipelineReliability(unittest.TestCase):
         # Must return exit code 1 to abort and protect existing deployment!
         self.assertEqual(code, 1)
 
+    def test_template_javascript_syntax_valid(self):
+        """Regression test: verify all inline JavaScript in template is syntactically valid."""
+        import re
+        import subprocess
+
+        template_path = Path(__file__).parent.parent / "templates" / "dashboard.html"
+        self.assertTrue(template_path.exists())
+        content = template_path.read_text(encoding="utf-8")
+
+        pattern = re.compile(
+            r'<script(?![^>]*type=["\']application/json["\'])[^>]*>(.*?)</script>',
+            re.DOTALL | re.IGNORECASE,
+        )
+        scripts = pattern.findall(content)
+        self.assertGreater(len(scripts), 0, "No executable script blocks found in template")
+
+        for idx, script_body in enumerate(scripts, 1):
+            code = script_body.strip()
+            if not code:
+                continue
+            proc = subprocess.run(
+                ["node", "--check"],
+                input=code,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                proc.returncode,
+                0,
+                f"Syntax error in script block #{idx}:\n{proc.stderr.strip()}",
+            )
+
+    def test_production_build_copies_assets(self):
+        """Verify production build creates index.html and copies static assets."""
+        out_dir = self.test_dir / "site_out"
+        code = run_pipeline(output_dir=out_dir, offline_mode=True)
+        self.assertEqual(code, 0)
+        self.assertTrue((out_dir / "index.html").exists())
+        self.assertTrue((out_dir / "favicon.ico").exists())
+        self.assertTrue((out_dir / "favicon.svg").exists())
+
 
 if __name__ == "__main__":
     unittest.main()
