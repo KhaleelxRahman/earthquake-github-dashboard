@@ -363,10 +363,86 @@
       gap: 0.6rem;
       flex-wrap: wrap;
     }
-    #quake-map {
+    .map-engine-switch {
+      display: inline-flex;
+      border-radius: var(--radius-sm);
+      background: rgba(15, 23, 42, 0.8);
+      padding: 2px;
+      border: 1px solid var(--border);
+      gap: 3px;
+    }
+    .btn-engine {
+      padding: 0.25rem 0.55rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      border-radius: var(--radius-sm);
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .btn-engine:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .btn-engine.active {
+      background: var(--primary);
+      color: #fff;
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(14, 165, 233, 0.35);
+    }
+    .map-notice-banner {
+      padding: 0.7rem 1rem;
+      margin: 0.6rem 0.8rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      background: rgba(245, 158, 11, 0.1);
+      color: #fbbf24;
+      animation: fadeIn 0.2s ease-in;
+    }
+    .map-notice-banner.error {
+      border-color: rgba(239, 68, 68, 0.4);
+      background: rgba(239, 68, 68, 0.12);
+      color: #f87171;
+    }
+    .map-notice-banner.info {
+      border-color: rgba(14, 165, 233, 0.4);
+      background: rgba(14, 165, 233, 0.1);
+      color: #38bdf8;
+    }
+    #quake-map, #quake-google-map {
       width: 100%;
       height: 600px;
       background: #050811;
+    }
+    /* Google Maps InfoWindow Dark Mode Overrides */
+    .gm-style .gm-style-iw-c {
+      background-color: var(--bg-card) !important;
+      color: var(--text-main) !important;
+      border: 1px solid var(--border) !important;
+      border-radius: var(--radius-sm) !important;
+      box-shadow: var(--shadow-md) !important;
+      padding: 0.75rem !important;
+    }
+    .gm-style .gm-style-iw-tc::after {
+      background-color: var(--bg-card) !important;
+    }
+    .gm-style .gm-style-iw-d {
+      overflow: hidden !important;
+      padding: 0 !important;
+    }
+    .gm-ui-hover-effect {
+      filter: invert(1);
     }
     .map-hud {
       position: absolute;
@@ -513,17 +589,66 @@
       background: rgba(255, 255, 255, 0.02);
     }
     .mag-badge {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
       padding: 0.15rem 0.5rem;
       border-radius: 4px;
       font-weight: 700;
       font-family: var(--font-mono);
       font-size: 0.82rem;
     }
+    .mag-label-text {
+      font-size: 0.72rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      opacity: 0.9;
+    }
     .mag-minor { background: rgba(16, 185, 129, 0.18); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
     .mag-mod { background: rgba(245, 158, 11, 0.18); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
     .mag-strong { background: rgba(249, 115, 22, 0.18); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.3); }
     .mag-major { background: rgba(239, 68, 68, 0.22); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+
+    .pager-badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .pager-green { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+    .pager-yellow { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); }
+    .pager-orange { background: rgba(249, 115, 22, 0.2); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.4); }
+    .pager-red { background: rgba(239, 68, 68, 0.25); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.5); }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border-width: 0;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
 
     /* Table Toolbar */
     .table-toolbar {
@@ -819,7 +944,7 @@
           <span>Explorer</span>
         </button>
         <button class="nav-btn" role="tab" aria-selected="false" data-tab="github-view">
-          <span>GitHub Intelligence</span>
+          <span>Seismic OSS</span>
         </button>
         <button class="nav-btn" role="tab" aria-selected="false" data-tab="about">
           <span>About</span>
@@ -919,10 +1044,14 @@
 
     <!-- VIEW 2: LIVE MAP -->
     <section id="view-map-view" class="view-section" role="tabpanel" aria-label="Interactive Map">
-      <div class="map-container-wrapper">
+      <div class="map-container-wrapper" id="live-map-wrapper">
         <div class="map-header">
           <span class="map-title">Interactive Geospatial Intelligence Map</span>
           <div class="map-filters">
+            <div class="map-engine-switch" role="radiogroup" aria-label="Map Provider Engine">
+              <button id="engine-btn-leaflet" class="btn-engine active" type="button" title="Leaflet / OpenStreetMap (Default fallback, no key needed)">🌐 Leaflet</button>
+              <button id="engine-btn-google" class="btn-engine" type="button" title="Google Maps JavaScript API">🗺️ Google Maps</button>
+            </div>
             <label style="font-size: 0.8rem; color: var(--text-muted);">
               Min Mag:
               <select id="map-filter-mag" class="select-feed" style="padding: 0.25rem 0.5rem;">
@@ -946,7 +1075,12 @@
           </div>
         </div>
 
+        <!-- Google Maps Notice Banner -->
+        <div id="google-maps-notice" class="map-notice-banner" style="display: none;"></div>
+
+        <!-- Provider Map Containers -->
         <div id="quake-map"></div>
+        <div id="quake-google-map" style="display: none;"></div>
 
         <!-- Coordinates HUD -->
         <div id="map-coords" class="map-hud">Lat: --, Lon: --</div>
@@ -1038,25 +1172,25 @@
       </div>
     </section>
 
-    <!-- VIEW 5: GITHUB INTELLIGENCE -->
-    <section id="view-github-view" class="view-section" role="tabpanel" aria-label="GitHub Repository Intelligence">
+    <!-- VIEW 5: SEISMOLOGY & GEOSPATIAL OSS -->
+    <section id="view-github-view" class="view-section" role="tabpanel" aria-label="Seismology and Geospatial Open Source Intelligence">
       <div class="kpi-grid">
         <div class="kpi-card accent-teal">
-          <div class="kpi-label">Top Python Repository</div>
+          <div class="kpi-label">Top Seismology Repository</div>
           <div id="kpi-top-repo" class="kpi-value" style="font-size: 1.3rem;">--</div>
           <div id="kpi-top-repo-stars" class="kpi-subtext">-- stars</div>
         </div>
         <div class="kpi-card">
           <div class="kpi-label">Total Stars Tracked</div>
           <div id="kpi-total-stars" class="kpi-value">--</div>
-          <div class="kpi-subtext">Top 10 open-source Python repos</div>
+          <div class="kpi-subtext">Top open-source seismology &amp; geospatial repos</div>
         </div>
       </div>
 
       <!-- Horizontal Bar Chart -->
       <div class="chart-card" style="margin-top: 1.5rem;">
         <div class="chart-card-header">
-          <span class="chart-card-title">Top 10 Python Repositories by Star Count</span>
+          <span class="chart-card-title">Top Seismology &amp; Geospatial Python Projects by Stars</span>
         </div>
         <div id="chart-github-repos" class="chart-container" style="height: 380px;"></div>
       </div>
@@ -1102,46 +1236,81 @@
       </div>
     </section>
 
+    <!-- Live Announcer for screen readers -->
+    <div id="live-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
   </main>
 
   <!-- Event Detail Modal -->
   <div id="event-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-event-title">
-    <div class="modal-card">
+    <div class="modal-card" style="max-width: 680px;">
       <div class="modal-header">
-        <h3 id="modal-event-title" style="color: #fff; font-size: 1.05rem;">Earthquake Event Details</h3>
-        <button id="btn-close-modal" class="btn" style="padding: 0.2rem 0.5rem;">✕</button>
+        <div>
+          <h3 id="modal-event-title" style="color: #fff; font-size: 1.05rem; font-weight: 700;">Earthquake Event Details</h3>
+          <div id="modal-place-sub" style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.2rem;">--</div>
+        </div>
+        <button id="btn-close-modal" class="btn" style="padding: 0.25rem 0.55rem;" aria-label="Close dialog">✕</button>
       </div>
-      <div class="modal-body">
+      <div class="modal-body" style="grid-template-columns: 1fr 1fr; max-height: 70vh; overflow-y: auto;">
+        <!-- Group 1: Measured Physical Telemetry -->
+        <div style="grid-column: span 2; border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; margin-top: 0.2rem;">
+          <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); font-weight: 700;">Measured Physical Telemetry</span>
+        </div>
         <div class="modal-row">
-          <span class="modal-row-label">Magnitude</span>
+          <span class="modal-row-label">Magnitude &amp; Method</span>
           <span id="modal-mag" class="modal-row-val">--</span>
         </div>
         <div class="modal-row">
-          <span class="modal-row-label">Depth</span>
+          <span class="modal-row-label">Focal Depth</span>
           <span id="modal-depth" class="modal-row-val">--</span>
         </div>
         <div class="modal-row">
-          <span class="modal-row-label">Place</span>
-          <span id="modal-place" class="modal-row-val" style="grid-column: span 2;">--</span>
-        </div>
-        <div class="modal-row">
-          <span class="modal-row-label">Event Timestamp</span>
+          <span class="modal-row-label">Origin Timestamp</span>
           <span id="modal-time" class="modal-row-val">--</span>
         </div>
         <div class="modal-row">
-          <span class="modal-row-label">Coordinates</span>
+          <span class="modal-row-label">Epicenter Coordinates</span>
           <span id="modal-coords" class="modal-row-val">--</span>
         </div>
         <div class="modal-row">
-          <span class="modal-row-label">Felt Reports</span>
+          <span class="modal-row-label">Review Status</span>
+          <span id="modal-status" class="modal-row-val">--</span>
+        </div>
+        <div class="modal-row">
+          <span class="modal-row-label">Contributing Network</span>
+          <span id="modal-network" class="modal-row-val">--</span>
+        </div>
+
+        <!-- Group 2: Citizen & Model Assessments -->
+        <div style="grid-column: span 2; border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; margin-top: 0.5rem;">
+          <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); font-weight: 700;">Community &amp; Modeled Impact</span>
+        </div>
+        <div class="modal-row">
+          <span class="modal-row-label">DYFI Citizen Reports</span>
           <span id="modal-felt" class="modal-row-val">--</span>
         </div>
         <div class="modal-row">
-          <span class="modal-row-label">Tsunami Warning</span>
-          <span id="modal-tsunami" class="modal-row-val">--</span>
+          <span class="modal-row-label">Community Intensity (CDI)</span>
+          <span id="modal-cdi" class="modal-row-val">--</span>
+        </div>
+        <div class="modal-row">
+          <span class="modal-row-label">ShakeMap Intensity (MMI)</span>
+          <span id="modal-mmi" class="modal-row-val">--</span>
+        </div>
+        <div class="modal-row">
+          <span class="modal-row-label">USGS PAGER Impact Alert</span>
+          <span id="modal-alert" class="modal-row-val">--</span>
+        </div>
+
+        <!-- Group 3: Marine & Tsunami Advisories -->
+        <div style="grid-column: span 2; border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; margin-top: 0.5rem;">
+          <span style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--primary); font-weight: 700;">Official Tsunami Bulletin Status</span>
+        </div>
+        <div class="modal-row" style="grid-column: span 2;">
+          <span id="modal-tsunami" class="modal-row-val" style="font-size: 0.85rem; line-height: 1.4;">--</span>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" style="justify-content: space-between; align-items: center;">
+        <button id="modal-btn-locate" class="btn" style="background: rgba(14, 165, 233, 0.15); border-color: var(--primary); color: #fff;">🗺️ Locate on Map</button>
         <a id="modal-usgs-link" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
           View on Official USGS Event Page &rarr;
         </a>
@@ -1169,12 +1338,155 @@
       let earthquakes = rawData.earthquakes || [];
       let repositories = rawData.repositories || [];
       let freshness = rawData.freshness || {};
+      let config = rawData.config || {};
       let useLocalTz = false;
 
+      // Map Engine Provider State
+      let currentMapEngine = "leaflet"; // "leaflet" | "google"
       let mapInstance = null;
       let overviewMapInstance = null;
       let mapMarkersLayer = null;
       let overviewMarkersLayer = null;
+      let googleMapInstance = null;
+      let googleMarkers = [];
+      let googleInfoWindow = null;
+      let googleMapsLoaded = false;
+      let googleMapsAuthFailed = false;
+
+      // Google Maps Dark Theme Styling
+      const googleMapsDarkTheme = [
+        { elementType: "geometry", stylers: [{ color: "#0f172a" }] },
+        { elementType: "labels.text.stroke", stylers: [{ color: "#0f172a" }] },
+        { elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
+        { featureType: "administrative.locality", elementType: "labels.text.fill", stylers: [{ color: "#cbd5e1" }] },
+        { featureType: "poi", elementType: "labels.text.fill", stylers: [{ color: "#64748b" }] },
+        { featureType: "poi.park", elementType: "geometry", stylers: [{ color: "#132338" }] },
+        { featureType: "road", elementType: "geometry", stylers: [{ color: "#1e293b" }] },
+        { featureType: "road", elementType: "geometry.stroke", stylers: [{ color: "#0f172a" }] },
+        { featureType: "road", elementType: "labels.text.fill", stylers: [{ color: "#64748b" }] },
+        { featureType: "road.highway", elementType: "geometry", stylers: [{ color: "#334155" }] },
+        { featureType: "road.highway", elementType: "geometry.stroke", stylers: [{ color: "#0f172a" }] },
+        { featureType: "road.highway", elementType: "labels.text.fill", stylers: [{ color: "#cbd5e1" }] },
+        { featureType: "transit", elementType: "geometry", stylers: [{ color: "#1e293b" }] },
+        { featureType: "water", elementType: "geometry", stylers: [{ color: "#070b14" }] },
+        { featureType: "water", elementType: "labels.text.fill", stylers: [{ color: "#475569" }] },
+        { featureType: "water", elementType: "labels.text.stroke", stylers: [{ color: "#070b14" }] }
+      ];
+
+      function getEffectiveGoogleMapsKey() {
+        if (config && config.googleMapsApiKey && config.googleMapsApiKey.trim()) {
+          return config.googleMapsApiKey.trim();
+        }
+        return "";
+      }
+
+      function showGoogleMapsNotice(html, type) {
+        const notice = document.getElementById("google-maps-notice");
+        if (!notice) return;
+        notice.className = "map-notice-banner" + (type ? " " + type : "");
+        notice.innerHTML = html;
+        notice.style.display = "flex";
+      }
+
+      function hideGoogleMapsNotice() {
+        const notice = document.getElementById("google-maps-notice");
+        if (notice) notice.style.display = "none";
+      }
+
+      function loadGoogleMapsScript(apiKey, onSuccess, onError) {
+        if (window.google && window.google.maps) {
+          googleMapsLoaded = true;
+          onSuccess();
+          return;
+        }
+
+        const existing = document.getElementById("google-maps-script");
+        if (existing) existing.remove();
+
+        window._initGoogleMapsCallback = function() {
+          googleMapsLoaded = true;
+          try { delete window._initGoogleMapsCallback; } catch (e) {}
+          onSuccess();
+        };
+
+        window.gm_authFailure = function() {
+          googleMapsAuthFailed = true;
+          showGoogleMapsNotice(
+            "<span>⚠️ Google Maps authentication failed (invalid API key, billing not active, or referrer mismatch). Retaining Leaflet fallback.</span>",
+            "error"
+          );
+          switchMapEngine("leaflet");
+          if (onError) onError(new Error("gm_authFailure"));
+        };
+
+        const script = document.createElement("script");
+        script.id = "google-maps-script";
+        script.src = "https://maps.googleapis.com/maps/api/js?key=" + encodeURIComponent(apiKey) + "&callback=_initGoogleMapsCallback&libraries=geometry";
+        script.async = true;
+        script.defer = true;
+        script.onerror = function(err) {
+          showGoogleMapsNotice("<span>⚠️ Failed to load Google Maps script from Google Cloud. Retaining Leaflet fallback.</span>", "error");
+          switchMapEngine("leaflet");
+          if (onError) onError(err);
+        };
+        document.head.appendChild(script);
+      }
+
+      function switchMapEngine(engine) {
+        const leafletBtn = document.getElementById("engine-btn-leaflet");
+        const googleBtn = document.getElementById("engine-btn-google");
+        const leafletDiv = document.getElementById("quake-map");
+        const googleDiv = document.getElementById("quake-google-map");
+
+        if (engine === "leaflet") {
+          currentMapEngine = "leaflet";
+          if (leafletBtn) leafletBtn.classList.add("active");
+          if (googleBtn) googleBtn.classList.remove("active");
+          if (googleDiv) googleDiv.style.display = "none";
+          if (leafletDiv) leafletDiv.style.display = "block";
+          if (mapInstance) {
+            setTimeout(() => mapInstance.invalidateSize(), 50);
+          }
+          return;
+        }
+
+        // Google Maps requested
+        currentMapEngine = "google";
+        if (googleBtn) googleBtn.classList.add("active");
+        if (leafletBtn) leafletBtn.classList.remove("active");
+
+        const apiKey = getEffectiveGoogleMapsKey();
+        if (!apiKey) {
+          showGoogleMapsNotice(
+            "<span>Google Maps integration requires a site-configured API key with billing enabled. Leaflet remains active with CartoDB Dark Matter and Esri imagery.</span> " +
+            "<button id='btn-dismiss-gmaps' class='btn' style='padding:0.25rem 0.6rem; font-size:0.75rem; margin-left:0.5rem;'>Dismiss</button>",
+            "warning"
+          );
+          const dismissBtn = document.getElementById("btn-dismiss-gmaps");
+          if (dismissBtn) dismissBtn.onclick = hideGoogleMapsNotice;
+
+          if (leafletDiv) leafletDiv.style.display = "block";
+          if (googleDiv) googleDiv.style.display = "none";
+          if (leafletBtn) leafletBtn.classList.add("active");
+          if (googleBtn) googleBtn.classList.remove("active");
+          currentMapEngine = "leaflet";
+          if (mapInstance) setTimeout(() => mapInstance.invalidateSize(), 50);
+          return;
+        }
+
+        hideGoogleMapsNotice();
+        if (leafletDiv) leafletDiv.style.display = "none";
+        if (googleDiv) googleDiv.style.display = "block";
+
+        loadGoogleMapsScript(apiKey, () => {
+          initGoogleMap();
+          if (googleMapInstance && window.google && window.google.maps) {
+            google.maps.event.trigger(googleMapInstance, "resize");
+          }
+        }, () => {
+          switchMapEngine("leaflet");
+        });
+      }
 
       // Table pagination and filtering state
       let currentPage = 1;
@@ -1196,6 +1508,121 @@
         if (mag < 6.0) return "mag-mod";
         if (mag < 7.0) return "mag-strong";
         return "mag-major";
+      }
+
+      // Magnitude text label helper (WCAG AA clarity: never communicate by color alone)
+      function getMagLabel(mag) {
+        if (mag < 5.0) return "Minor";
+        if (mag < 6.0) return "Moderate";
+        if (mag < 7.0) return "Strong";
+        return "Major";
+      }
+
+      // Modified Mercalli Intensity description helper
+      function getMMIDescription(mmi) {
+        if (mmi === null || mmi === undefined || isNaN(mmi)) return "Not Modeled";
+        const val = parseFloat(mmi);
+        if (val < 1.5) return "I (Not Felt)";
+        if (val < 2.5) return "II (Weak)";
+        if (val < 3.5) return "III (Weak)";
+        if (val < 4.5) return "IV (Light)";
+        if (val < 5.5) return "V (Moderate)";
+        if (val < 6.5) return "VI (Strong)";
+        if (val < 7.5) return "VII (Very Strong)";
+        if (val < 8.5) return "VIII (Severe)";
+        if (val < 9.5) return "IX (Violent)";
+        return "X+ (Extreme)";
+      }
+
+      // Live screen-reader announcer
+      function announceLiveUpdate(msg) {
+        const el = document.getElementById("live-announcer");
+        if (el) {
+          el.textContent = "";
+          setTimeout(() => { el.textContent = msg; }, 40);
+        }
+      }
+
+      // Accessibility focus trapping in modals
+      let lastFocusedElement = null;
+      let modalKeyHandler = null;
+
+      function trapFocusInModal(modalEl) {
+        const focusable = modalEl.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        first.focus();
+
+        if (modalKeyHandler) {
+          document.removeEventListener("keydown", modalKeyHandler);
+        }
+
+        modalKeyHandler = function(e) {
+          if (e.key === "Escape") {
+            closeModal();
+            return;
+          }
+          if (e.key === "Tab") {
+            if (e.shiftKey) {
+              if (document.activeElement === first) {
+                last.focus();
+                e.preventDefault();
+              }
+            } else {
+              if (document.activeElement === last) {
+                first.focus();
+                e.preventDefault();
+              }
+            }
+          }
+        };
+        document.addEventListener("keydown", modalKeyHandler);
+      }
+
+      // Two-way interactive Map Locator
+      function locateEventOnMap(eq) {
+        if (!eq) return;
+        const lat = parseFloat(eq.latitude);
+        const lon = parseFloat(eq.longitude);
+        if (isNaN(lat) || isNaN(lon)) {
+          console.warn("Invalid coordinates for locating event:", eq);
+          return;
+        }
+
+        switchTab("map-view");
+
+        if (currentMapEngine === "google" && googleMapInstance && window.google && window.google.maps) {
+          googleMapInstance.setCenter({ lat: lat, lng: lon });
+          googleMapInstance.setZoom(6);
+          if (googleInfoWindow) {
+            googleInfoWindow.setContent(`
+              <div style="font-family: system-ui, sans-serif; color: #1e293b; padding: 4px; min-width: 180px;">
+                <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 4px;">M ${eq.magnitude.toFixed(1)} &bull; ${getMagLabel(eq.magnitude)}</div>
+                <div style="font-size: 0.82rem; margin-bottom: 4px;">${escapeHtml(eq.place)}</div>
+                <div style="font-size: 0.75rem; color: #64748b;">Depth: ${eq.depth_km} km</div>
+                <div style="font-size: 0.75rem; color: #64748b;">${formatTimestamp(eq.time_ms)}</div>
+              </div>
+            `);
+            googleInfoWindow.setPosition({ lat: lat, lng: lon });
+            googleInfoWindow.open(googleMapInstance);
+          }
+        } else if (mapInstance) {
+          mapInstance.setView([lat, lon], 6);
+          L.popup()
+            .setLatLng([lat, lon])
+            .setContent(`
+              <div style="font-family: system-ui, sans-serif; font-size: 0.85rem; min-width: 200px;">
+                <div style="font-weight: 700; margin-bottom: 3px;">M ${eq.magnitude.toFixed(1)} &bull; ${getMagLabel(eq.magnitude)}</div>
+                <div style="font-size: 0.8rem; margin-bottom: 5px;">${escapeHtml(eq.place)}</div>
+                <div style="font-size: 0.75rem; color: var(--text-dim, #888);">Depth: ${eq.depth_km} km</div>
+                <div style="font-size: 0.75rem; color: var(--text-dim, #888);">${formatTimestamp(eq.time_ms)}</div>
+              </div>
+            `)
+            .openOn(mapInstance);
+        }
+
+        announceLiveUpdate("Centered map on M " + eq.magnitude.toFixed(1) + " earthquake near " + eq.place);
       }
 
       // Format timestamp helper
@@ -1245,9 +1672,15 @@
           sec.classList.toggle("active", match);
         });
 
-        // Trigger map invalidateSize on tab switch
-        if (tabId === "map-view" && mapInstance) {
-          setTimeout(() => mapInstance.invalidateSize(), 100);
+        // Trigger map invalidateSize / resize on tab switch
+        if (tabId === "map-view") {
+          setTimeout(() => {
+            if (currentMapEngine === "google" && googleMapInstance && window.google && window.google.maps) {
+              google.maps.event.trigger(googleMapInstance, "resize");
+            } else if (mapInstance) {
+              mapInstance.invalidateSize();
+            }
+          }, 100);
         }
         if (tabId === "overview" && overviewMapInstance) {
           setTimeout(() => overviewMapInstance.invalidateSize(), 100);
@@ -1265,10 +1698,26 @@
           }, 100);
         }
       }
-      window.QuakeScopeApp = { switchTab: switchTab, openModal: openModal };
+      window.QuakeScopeApp = {
+        switchTab: switchTab,
+        openModal: openModal,
+        closeModal: closeModal,
+        locateEventOnMap: locateEventOnMap,
+        switchMapEngine: switchMapEngine,
+      };
 
-      // Header controls (TZ toggle, refresh, feed selector)
+      // Header controls (TZ toggle, refresh, feed selector, map engines)
       function setupControls() {
+        // Map Engine Switchers
+        const engineLeafletBtn = document.getElementById("engine-btn-leaflet");
+        if (engineLeafletBtn) {
+          engineLeafletBtn.addEventListener("click", () => switchMapEngine("leaflet"));
+        }
+        const engineGoogleBtn = document.getElementById("engine-btn-google");
+        if (engineGoogleBtn) {
+          engineGoogleBtn.addEventListener("click", () => switchMapEngine("google"));
+        }
+
         const tzBtn = document.getElementById("btn-tz-toggle");
         tzBtn.addEventListener("click", () => {
           useLocalTz = !useLocalTz;
@@ -1299,14 +1748,27 @@
           updateMapMarkers();
         });
         document.getElementById("btn-reset-map").addEventListener("click", () => {
-          if (mapInstance) mapInstance.setView([20, 0], 2);
+          if (currentMapEngine === "google" && googleMapInstance) {
+            googleMapInstance.setCenter({ lat: 20, lng: 0 });
+            googleMapInstance.setZoom(2);
+          } else if (mapInstance) {
+            mapInstance.setView([20, 0], 2);
+          }
         });
         document.getElementById("btn-fullscreen-map").addEventListener("click", () => {
-          const elem = document.getElementById("quake-map");
+          const elem = document.getElementById("live-map-wrapper");
           if (!document.fullscreenElement) {
-            elem.requestFullscreen().catch(() => {});
+            if (elem.requestFullscreen) elem.requestFullscreen().catch(() => {});
           } else {
-            document.exitFullscreen();
+            if (document.exitFullscreen) document.exitFullscreen();
+          }
+        });
+
+        document.addEventListener("fullscreenchange", () => {
+          if (currentMapEngine === "google" && googleMapInstance && window.google && window.google.maps) {
+            google.maps.event.trigger(googleMapInstance, "resize");
+          } else if (mapInstance) {
+            mapInstance.invalidateSize();
           }
         });
 
@@ -1442,15 +1904,22 @@
 
         recent.forEach(e => {
           const item = document.createElement("div");
-          item.style.cssText = "background: var(--bg-card); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; cursor: pointer;";
+          item.style.cssText = "background: var(--bg-card); padding: 0.65rem 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;";
           item.innerHTML = `
-            <div>
-              <div style="font-weight: 600; font-size: 0.84rem; color: #fff;">${escapeHtml(e.place)}</div>
+            <div style="flex: 1; min-width: 0; cursor: pointer;" class="feed-info-click">
+              <div style="font-weight: 600; font-size: 0.84rem; color: #fff; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${escapeHtml(e.place)}</div>
               <div style="font-size: 0.74rem; color: var(--text-dim);">${formatTimestamp(e.time_ms)} &bull; ${e.depth_km} km depth</div>
             </div>
-            <span class="mag-badge ${getMagBadgeClass(e.magnitude)}">M ${e.magnitude.toFixed(1)}</span>
+            <div style="display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0;">
+              <span class="mag-badge ${getMagBadgeClass(e.magnitude)}">M ${e.magnitude.toFixed(1)}</span>
+              <span class="mag-label-text">${getMagLabel(e.magnitude)}</span>
+              <button class="btn btn-locate" style="padding: 0.2rem 0.5rem; font-size: 0.72rem;" title="Locate on live map">🗺️ Map</button>
+              <button class="btn btn-details" style="padding: 0.2rem 0.5rem; font-size: 0.72rem;" title="Inspect scientific telemetry">Details</button>
+            </div>
           `;
-          item.addEventListener("click", () => openModal(e));
+          item.querySelector(".feed-info-click").addEventListener("click", () => openModal(e));
+          item.querySelector(".btn-details").addEventListener("click", () => openModal(e));
+          item.querySelector(".btn-locate").addEventListener("click", () => locateEventOnMap(e));
           container.appendChild(item);
         });
       }
@@ -1498,14 +1967,23 @@
           pageData.forEach(e => {
             const tr = document.createElement("tr");
             tr.innerHTML = `
-              <td><span class="mag-badge ${getMagBadgeClass(e.magnitude)}">M ${e.magnitude.toFixed(1)}</span></td>
+              <td>
+                <span class="mag-badge ${getMagBadgeClass(e.magnitude)}">M ${e.magnitude.toFixed(1)}</span>
+                <span class="mag-label-text">${getMagLabel(e.magnitude)}</span>
+              </td>
               <td style="font-weight: 500;">${escapeHtml(e.place)}</td>
               <td style="font-family: var(--font-mono); font-size: 0.8rem;">${formatTimestamp(e.time_ms)}</td>
               <td style="font-family: var(--font-mono);">${e.depth_km}</td>
               <td style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--text-muted);">${e.latitude}, ${e.longitude}</td>
-              <td><button class="btn" style="padding: 0.2rem 0.6rem; font-size: 0.75rem;">Details</button></td>
+              <td>
+                <div style="display: flex; gap: 0.35rem;">
+                  <button class="btn btn-details" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" title="Inspect scientific telemetry">Details</button>
+                  <button class="btn btn-locate" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;" title="Locate on live map">🗺️ Map</button>
+                </div>
+              </td>
             `;
-            tr.querySelector("button").addEventListener("click", () => openModal(e));
+            tr.querySelector(".btn-details").addEventListener("click", () => openModal(e));
+            tr.querySelector(".btn-locate").addEventListener("click", () => locateEventOnMap(e));
             tbody.appendChild(tr);
           });
         }
@@ -1568,6 +2046,7 @@
 
         L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
           subdomains: "abcd",
+          detectRetina: true,
           maxZoom: 19
         }).addTo(overviewMapInstance);
 
@@ -1610,6 +2089,7 @@
         const darkLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
           attribution: '&copy; <a href="https://carto.com/">CARTO</a> &bull; &copy; OpenStreetMap contributors',
           subdomains: "abcd",
+          detectRetina: true,
           maxZoom: 19
         }).addTo(mapInstance);
 
@@ -1636,7 +2116,91 @@
         updateMapMarkers();
       }
 
-      function updateMapMarkers() {
+      function initGoogleMap() {
+        const el = document.getElementById("quake-google-map");
+        if (!el || !window.google || !window.google.maps) return;
+
+        if (!googleMapInstance) {
+          googleMapInstance = new google.maps.Map(el, {
+            center: { lat: 20, lng: 0 },
+            zoom: 2,
+            minZoom: 2,
+            maxZoom: 14,
+            styles: googleMapsDarkTheme,
+            mapTypeControl: true,
+            mapTypeControlOptions: {
+              style: google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+              position: google.maps.ControlPosition.TOP_RIGHT
+            },
+            streetViewControl: false,
+            fullscreenControl: false
+          });
+
+          googleInfoWindow = new google.maps.InfoWindow();
+
+          googleMapInstance.addListener("mousemove", (e) => {
+            if (e.latLng) {
+              document.getElementById("map-coords").textContent = `Lat: ${e.latLng.lat().toFixed(4)}, Lon: ${e.latLng.lng().toFixed(4)}`;
+            }
+          });
+        }
+
+        updateGoogleMapMarkers();
+      }
+
+      function updateGoogleMapMarkers() {
+        if (!googleMapInstance || !window.google || !window.google.maps) return;
+
+        googleMarkers.forEach(m => m.setMap(null));
+        googleMarkers = [];
+
+        const magThreshold = parseFloat(document.getElementById("map-filter-mag").value) || 0.0;
+        const depthFilter = document.getElementById("map-filter-depth").value;
+
+        earthquakes.forEach(e => {
+          if (e.magnitude < magThreshold) return;
+          if (depthFilter === "shallow" && e.depth_km >= 70) return;
+          if (depthFilter === "intermediate" && (e.depth_km < 70 || e.depth_km >= 300)) return;
+          if (depthFilter === "deep" && e.depth_km < 300) return;
+
+          const color = getMagColor(e.magnitude);
+          const scale = Math.max(4, Math.min(18, (e.magnitude - 3.0) * 3.5));
+
+          const marker = new google.maps.Marker({
+            position: { lat: e.latitude, lng: e.longitude },
+            map: googleMapInstance,
+            title: `${e.place} (M ${e.magnitude.toFixed(1)})`,
+            icon: {
+              path: google.maps.SymbolPath.CIRCLE,
+              scale: scale,
+              fillColor: color,
+              fillOpacity: 0.85,
+              strokeColor: "#ffffff",
+              strokeWeight: 1
+            }
+          });
+
+          const popupContent = `
+            <div class="popup-box" style="color: #f1f5f9; min-width: 220px;">
+              <span class="popup-mag" style="background: ${color}; color: #fff;">M ${e.magnitude.toFixed(1)}</span>
+              <div class="popup-title" style="color: #fff; font-size: 0.92rem; font-weight: 700; margin-bottom: 0.35rem;">${escapeHtml(e.place)}</div>
+              <div class="popup-row" style="display:flex; justify-content:space-between; font-size:0.78rem; color:#94a3b8; margin-top:0.2rem;"><span>Time:</span> <strong style="color:#fff;">${formatTimestamp(e.time_ms)}</strong></div>
+              <div class="popup-row" style="display:flex; justify-content:space-between; font-size:0.78rem; color:#94a3b8; margin-top:0.2rem;"><span>Depth:</span> <strong style="color:#fff;">${e.depth_km} km</strong></div>
+              <div class="popup-row" style="display:flex; justify-content:space-between; font-size:0.78rem; color:#94a3b8; margin-top:0.2rem;"><span>Coords:</span> <strong style="color:#fff;">${e.latitude}, ${e.longitude}</strong></div>
+              ${e.url ? `<a href="${escapeHtml(e.url)}" target="_blank" rel="noopener noreferrer" class="popup-btn" style="margin-top:0.6rem; display:block; text-align:center; padding:0.35rem 0.5rem; background:var(--primary); color:#fff !important; border-radius:var(--radius-sm); font-size:0.75rem; font-weight:600; text-decoration:none !important;">Open Official USGS Page &rarr;</a>` : ""}
+            </div>
+          `;
+
+          marker.addListener("click", () => {
+            googleInfoWindow.setContent(popupContent);
+            googleInfoWindow.open(googleMapInstance, marker);
+          });
+
+          googleMarkers.push(marker);
+        });
+      }
+
+      function updateLeafletMapMarkers() {
         if (!mapMarkersLayer) return;
         mapMarkersLayer.clearLayers();
 
@@ -1674,6 +2238,13 @@
           marker.bindPopup(popupContent);
           mapMarkersLayer.addLayer(marker);
         });
+      }
+
+      function updateMapMarkers() {
+        updateLeafletMapMarkers();
+        if (googleMapInstance && window.google && window.google.maps) {
+          updateGoogleMapMarkers();
+        }
       }
 
       function updateMapPopups() {
@@ -1810,10 +2381,15 @@
               longitude: parseFloat(coords[0]),
               depth_km: parseFloat(coords[2]),
               url: f.properties.url || "",
-              felt: f.properties.felt,
+              felt: f.properties.felt != null ? parseInt(f.properties.felt, 10) : null,
+              cdi: f.properties.cdi != null ? parseFloat(f.properties.cdi) : null,
+              mmi: f.properties.mmi != null ? parseFloat(f.properties.mmi) : null,
+              alert: f.properties.alert ? String(f.properties.alert).toLowerCase() : null,
+              status: f.properties.status || "reviewed",
+              net: f.properties.net || "us",
+              mag_type: f.properties.magType || "",
               tsunami: f.properties.tsunami || 0,
-              significance: f.properties.sig || 0,
-              status: f.properties.status || "reviewed"
+              significance: f.properties.sig || 0
             });
           });
 
@@ -1842,20 +2418,74 @@
 
       // Modal inspector
       function openModal(eq) {
-        document.getElementById("modal-event-title").textContent = `M ${eq.magnitude.toFixed(1)} — ${eq.place}`;
-        document.getElementById("modal-mag").textContent = eq.magnitude.toFixed(2);
-        document.getElementById("modal-depth").textContent = `${eq.depth_km} km`;
-        document.getElementById("modal-place").textContent = eq.place;
+        if (!eq) return;
+        lastFocusedElement = document.activeElement;
+        const modal = document.getElementById("event-modal");
+
+        document.getElementById("modal-event-title").textContent = `M ${eq.magnitude.toFixed(1)} — ${eq.place || "Unknown"}`;
+        document.getElementById("modal-place-sub").textContent = `Event ID: ${eq.id || "--"} • Network: ${(eq.net || "US").toUpperCase()} • Status: ${(eq.status || "reviewed").toUpperCase()}`;
+
+        document.getElementById("modal-mag").textContent = `M ${eq.magnitude.toFixed(2)} (${getMagLabel(eq.magnitude)})${eq.mag_type ? " [" + eq.mag_type.toUpperCase() + "]" : ""}`;
+
+        const depthClass = eq.depth_km < 70 ? "Shallow (<70 km)" : eq.depth_km <= 300 ? "Intermediate (70–300 km)" : "Deep (>300 km)";
+        document.getElementById("modal-depth").textContent = `${eq.depth_km} km (${depthClass})`;
         document.getElementById("modal-time").textContent = formatTimestamp(eq.time_ms);
-        document.getElementById("modal-coords").textContent = `Lat ${eq.latitude}, Lon ${eq.longitude}`;
-        document.getElementById("modal-felt").textContent = eq.felt !== null && eq.felt !== undefined ? `${eq.felt} felt reports` : "None reported";
-        document.getElementById("modal-tsunami").textContent = eq.tsunami === 1 ? "⚠️ Tsunami Warning Issued" : "No Tsunami Threat";
-        document.getElementById("modal-usgs-link").href = eq.url || "#";
-        document.getElementById("event-modal").classList.add("open");
+        document.getElementById("modal-coords").textContent = `Lat ${eq.latitude.toFixed(4)}°, Lon ${eq.longitude.toFixed(4)}°`;
+        document.getElementById("modal-status").textContent = (eq.status || "reviewed").toUpperCase();
+        document.getElementById("modal-network").textContent = (eq.net || "US").toUpperCase();
+
+        document.getElementById("modal-felt").textContent = (eq.felt !== null && eq.felt !== undefined) ? `${eq.felt.toLocaleString()} DYFI citizen reports` : "None submitted";
+        document.getElementById("modal-cdi").textContent = (eq.cdi !== null && eq.cdi !== undefined) ? `${parseFloat(eq.cdi).toFixed(1)} (${getMMIDescription(eq.cdi)})` : "N/A (No felt reports)";
+        document.getElementById("modal-mmi").textContent = (eq.mmi !== null && eq.mmi !== undefined) ? `${parseFloat(eq.mmi).toFixed(1)} — ${getMMIDescription(eq.mmi)}` : "N/A (No instrumental ShakeMap)";
+
+        const alertEl = document.getElementById("modal-alert");
+        if (eq.alert) {
+          const alertLower = String(eq.alert).toLowerCase();
+          alertEl.className = "pager-badge pager-" + alertLower;
+          alertEl.textContent = "PAGER " + alertLower.toUpperCase();
+        } else {
+          alertEl.className = "pager-badge";
+          alertEl.style.background = "var(--bg-card)";
+          alertEl.style.color = "var(--text-muted)";
+          alertEl.style.borderColor = "var(--border)";
+          alertEl.textContent = "PAGER Not Issued";
+        }
+
+        const tsuEl = document.getElementById("modal-tsunami");
+        if (eq.tsunami === 1) {
+          tsuEl.innerHTML = '<span style="color: var(--mag-major); font-weight: 700;">⚠️ Tsunami Bulletin Active</span> &bull; Check official status at <a href="https://www.tsunami.gov" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; color: #38bdf8;">tsunami.gov</a>';
+        } else {
+          tsuEl.innerHTML = '<span style="color: var(--mag-minor); font-weight: 600;">✓ No Tsunami Threat Flagged by USGS</span> (Official flag: 0)';
+        }
+
+        document.getElementById("modal-usgs-link").href = eq.url || `https://earthquake.usgs.gov/earthquakes/eventpage/${eq.id}`;
+
+        const locateBtn = document.getElementById("modal-btn-locate");
+        if (locateBtn) {
+          locateBtn.onclick = () => {
+            closeModal();
+            locateEventOnMap(eq);
+          };
+        }
+
+        modal.classList.add("open");
+        modal.setAttribute("aria-hidden", "false");
+        trapFocusInModal(modal);
       }
 
       function closeModal() {
-        document.getElementById("event-modal").classList.remove("open");
+        const modal = document.getElementById("event-modal");
+        if (modal) {
+          modal.classList.remove("open");
+          modal.setAttribute("aria-hidden", "true");
+        }
+        if (modalKeyHandler) {
+          document.removeEventListener("keydown", modalKeyHandler);
+          modalKeyHandler = null;
+        }
+        if (lastFocusedElement && typeof lastFocusedElement.focus === "function") {
+          lastFocusedElement.focus();
+        }
       }
 
       // Export helpers

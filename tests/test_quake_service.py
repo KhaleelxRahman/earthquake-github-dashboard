@@ -195,6 +195,102 @@ class TestEarthquakeParsing(unittest.TestCase):
         records = parse_earthquake_features(duped)
         self.assertEqual(len(records), 1)
 
+    def test_parse_scientific_provenance_fields(self):
+        """Verify ingestion of official USGS scientific fields (MMI, CDI, PAGER alert, network)."""
+        data = {
+            "features": [
+                {
+                    "id": "us7000test_sci",
+                    "properties": {
+                        "mag": 7.1,
+                        "place": "Offshore Honshu, Japan",
+                        "time": 1700000100000,
+                        "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000test_sci",
+                        "felt": 1250,
+                        "cdi": 6.8,
+                        "mmi": 7.4,
+                        "alert": "yellow",
+                        "status": "reviewed",
+                        "net": "us",
+                        "magType": "mww",
+                        "tsunami": 1,
+                        "sig": 890,
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [142.3, 38.2, 32.0],
+                    },
+                }
+            ]
+        }
+        records = parse_earthquake_features(data)
+        self.assertEqual(len(records), 1)
+        r = records[0]
+        self.assertEqual(r["mmi"], 7.4)
+        self.assertEqual(r["cdi"], 6.8)
+        self.assertEqual(r["alert"], "yellow")
+        self.assertEqual(r["status"], "reviewed")
+        self.assertEqual(r["net"], "us")
+        self.assertEqual(r["mag_type"], "mww")
+        self.assertEqual(r["felt"], 1250)
+        self.assertEqual(r["tsunami"], 1)
+
+    def test_parse_scientific_fields_edge_cases(self):
+        """Verify handling of missing, null, or out-of-range scientific values."""
+        data = {
+            "features": [
+                {
+                    "id": "us_missing_fields",
+                    "properties": {
+                        "mag": 5.0,
+                        "place": "Aleutian Islands",
+                        "time": 1700000200000,
+                        "felt": None,
+                        "cdi": None,
+                        "mmi": None,
+                        "alert": None,
+                        "magType": None,
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [-175.0, 52.0, 15.0],
+                    },
+                },
+                {
+                    "id": "us_invalid_ranges",
+                    "properties": {
+                        "mag": 5.2,
+                        "place": "Mid-Atlantic Ridge",
+                        "time": 1700000300000,
+                        "mmi": 99.0,  # Out of range (>12.0)
+                        "cdi": -5.0,  # Negative
+                        "alert": "invalid_color_alert",  # Unknown PAGER alert
+                        "felt": -10,  # Negative felt reports
+                    },
+                    "geometry": {
+                        "type": "Point",
+                        "coordinates": [-25.0, 10.0, 10.0],
+                    },
+                },
+            ]
+        }
+        records = parse_earthquake_features(data)
+        self.assertEqual(len(records), 2)
+        # Check missing fields record
+        r_missing = next(x for x in records if x["id"] == "us_missing_fields")
+        self.assertIsNone(r_missing["mmi"])
+        self.assertIsNone(r_missing["cdi"])
+        self.assertIsNone(r_missing["alert"])
+        self.assertIsNone(r_missing["felt"])
+        self.assertEqual(r_missing["mag_type"], "")
+
+        # Check invalid ranges record
+        r_invalid = next(x for x in records if x["id"] == "us_invalid_ranges")
+        self.assertIsNone(r_invalid["mmi"])
+        self.assertIsNone(r_invalid["cdi"])
+        self.assertIsNone(r_invalid["alert"])
+        self.assertIsNone(r_invalid["felt"])
+
 
 class TestRepositoryParsing(unittest.TestCase):
     """Test GitHub repository response parsing."""

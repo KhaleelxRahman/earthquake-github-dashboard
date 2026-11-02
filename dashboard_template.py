@@ -18,6 +18,7 @@ def generate_dashboard_html(
     repositories: List[Dict[str, Any]],
     analytics: Dict[str, Any],
     freshness: Dict[str, Any],
+    config: Optional[Dict[str, Any]] = None,
 ) -> str:
     """Render the complete QuakeScope dashboard HTML with embedded initial state."""
     if not TEMPLATE_PATH.exists():
@@ -30,6 +31,7 @@ def generate_dashboard_html(
         "repositories": repositories,
         "analytics": analytics,
         "freshness": freshness,
+        "config": config or {"googleMapsApiKey": ""},
     }
     payload_json = json.dumps(initial_payload, ensure_ascii=False)
 

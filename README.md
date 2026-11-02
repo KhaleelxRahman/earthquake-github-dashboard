@@ -18,13 +18,16 @@ Explore the hosted application on GitHub Pages:
 ## What It Does & Does Not Do
 
 ### What It Does
-* **Interactive Geospatial Visualization**: Global vector map powered by Leaflet.js with CartoDB Dark Matter, OpenStreetMap, and Esri Satellite basemaps.
+* **Dual-Provider Interactive Geospatial Visualization**: Global vector map with an instant in-app provider switcher:
+  * **🌐 Leaflet.js (Default)**: Fully featured, zero-key, zero-cost CartoDB Dark Matter, OpenStreetMap, and Esri Satellite basemaps.
+  * **🗺️ Google Maps**: Official Google Maps JavaScript API with customized dark theme, magnitude circle scaling, interactive InfoWindows, and smooth controls.
 * **Magnitude-Scaled & Colored Telemetry**: Visualizes earthquakes with magnitude-scaled markers and color indicators (Minor, Moderate, Strong, Major) with pulse animations for significant events.
 * **Dual-Layer Ingestion**: Combines pre-rendered build snapshots for zero-latency initial page loads with direct client-side browser polling to the USGS CORS endpoints.
 * **Advanced Analytics**: Interactive Plotly distributions for earthquake magnitude, focal depth, UTC hourly frequency, and regional activity rankings.
 * **Accessible Earthquake Explorer**: Searchable, multi-column sortable table with pagination, event detail inspector modal, and client-side **RFC 4180 CSV** and **GeoJSON** export.
 * **GitHub Repository Intelligence**: Tracks popular Python repositories with stars, forks, and interactive bar chart rankings.
 * **Zero-Data-Loss Architecture**: Atomic file writing, retry mechanisms with exponential backoff, and automatic fallback to verified snapshots prevent pipeline failures from wiping out working dashboards.
+* **Graceful Map Degradation**: If Google Maps is selected without a key, or if authentication fails (`gm_authFailure`), QuakeScope displays a clear, polite notice banner and retains a fully operational Leaflet fallback—**never blanking the dashboard**.
 
 ### What It Does Not Do
 * **No AI Earthquake Predictions**: Earthquakes cannot be predicted. QuakeScope reports historical and real-time observed telemetry provided by scientific seismic monitoring networks.
@@ -108,6 +111,9 @@ pip install -r requirements.txt
 # Standard run (fetches live data, falls back to cache if offline)
 python data_pipeline.py
 
+# Build with Google Maps JavaScript API enabled
+python data_pipeline.py --google-maps-key "YOUR_API_KEY"
+
 # Force offline build using verified baseline
 python data_pipeline.py --offline
 
@@ -115,13 +121,15 @@ python data_pipeline.py --offline
 python data_pipeline.py --validate-only
 ```
 
+See [docs/GOOGLE_MAPS_SETUP.md](docs/GOOGLE_MAPS_SETUP.md) for full instructions on Google Cloud configuration, domain restrictions, and secret setup.
+
 Open `index.html` in your web browser to explore the dashboard locally.
 
 ---
 
 ## Running the Automated Test Suite
 
-QuakeScope includes 21 comprehensive unit and integration tests that run completely offline:
+QuakeScope includes 25 comprehensive unit and integration tests that run completely offline:
 
 ```bash
 # Run tests with Python's built-in test runner
@@ -131,7 +139,7 @@ python -m unittest discover -s tests -v
 pytest -v
 ```
 
-All tests validate coordinate ranges, data sanitization, empty responses, malformed records, rate-limit recovery, and atomic writing.
+All tests validate coordinate ranges, data sanitization, empty responses, malformed records, rate-limit recovery, Google Maps fallback and injection, inline JavaScript syntax validation, and atomic writing.
 
 ---
 

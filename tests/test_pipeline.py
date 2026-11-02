@@ -47,6 +47,20 @@ class TestPipelineReliability(unittest.TestCase):
         self.dest_file.write_text(no_marker, encoding="utf-8")
         self.assertFalse(validate_output_html(self.dest_file))
 
+    def test_validate_output_html_too_large(self):
+        """Verify upper bound validation rejection when file exceeds 1.5MB."""
+        oversized = """<!doctype html>
+<html>
+<head><title>QuakeScope — Global Earthquake Intelligence</title></head>
+<body>
+  <h1>QuakeScope</h1>
+  <script id="quakescope-data">{"earthquakes": []}</script>
+</body>
+</html>
+""" + ("X" * 1600000)
+        self.dest_file.write_text(oversized, encoding="utf-8")
+        self.assertFalse(validate_output_html(self.dest_file))
+
     def test_atomic_write_preserves_target_on_failure(self):
         # Create an existing good file
         original_content = "ORIGINAL_GOOD_CONTENT_PLACEHOLDER"
@@ -125,6 +139,102 @@ class TestPipelineReliability(unittest.TestCase):
         self.assertTrue((out_dir / "index.html").exists())
         self.assertTrue((out_dir / "favicon.ico").exists())
         self.assertTrue((out_dir / "favicon.svg").exists())
+
+    def test_google_maps_key_injection_and_fallback(self):
+        """Verify Google Maps key injection, fallback, and environment resolution."""
+        import json
+        import os
+
+        # 1. Explicit key parameter
+        out_dir = self.test_dir / "gmaps_key"
+        code = run_pipeline(
+            output_dir=out_dir,
+            google_maps_api_key="AIzaSyTestKey_Explicit",
+            offline_mode=True,
+        )
+        self.assertEqual(code, 0)
+        content = (out_dir / "index.html").read_text(encoding="utf-8")
+        self.assertIn('"googleMapsApiKey": "AIzaSyTestKey_Explicit"', content)
+
+        # 2. Environment variable resolution
+        out_dir_env = self.test_dir / "gmaps_env"
+        with patch.dict(os.environ, {"GOOGLE_MAPS_API_KEY": "AIzaSyTestKey_FromEnv"}):
+            code_env = run_pipeline(output_dir=out_dir_env, offline_mode=True)
+            self.assertEqual(code_env, 0)
+            content_env = (out_dir_env / "index.html").read_text(encoding="utf-8")
+            self.assertIn('"googleMapsApiKey": "AIzaSyTestKey_FromEnv"', content_env)
+
+        # 3. Default fallback (empty string, no crash)
+        out_dir_empty = self.test_dir / "gmaps_empty"
+        with patch.dict(os.environ, {"GOOGLE_MAPS_API_KEY": ""}, clear=False):
+            code_empty = run_pipeline(output_dir=out_dir_empty, offline_mode=True)
+            self.assertEqual(code_empty, 0)
+            content_empty = (out_dir_empty / "index.html").read_text(encoding="utf-8")
+            self.assertIn('"googleMapsApiKey": ""', content_empty)
+
+    def test_generated_html_javascript_syntax_valid(self):
+        """Verify that JavaScript inside built production index.html parses with zero errors."""
+        import re
+        import subprocess
+
+        out_dir = self.test_dir / "built_site"
+        run_pipeline(output_dir=out_dir, offline_mode=True)
+        html_file = out_dir / "index.html"
+        self.assertTrue(html_file.exists())
+
+        content = html_file.read_text(encoding="utf-8")
+        pattern = re.compile(
+            r'<script(?![^>]*type=["\']application/json["\'])[^>]*>(.*?)</script>',
+            re.DOTALL | re.IGNORECASE,
+        )
+        scripts = pattern.findall(content)
+        self.assertGreater(len(scripts), 0)
+
+        for idx, script_body in enumerate(scripts, 1):
+            code = script_body.strip()
+            if not code:
+                continue
+            proc = subprocess.run(
+                ["node", "--check"],
+                input=code,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+            )
+            self.assertEqual(
+                proc.returncode,
+                0,
+                f"Syntax error in generated index.html script block #{idx}:\n{proc.stderr.strip()}",
+            )
+
+    def test_output_html_contains_scientific_and_accessibility_elements(self):
+        """Verify built HTML includes accessibility announcements, retina tiles, and scientific fields."""
+        out_dir = self.test_dir / "elements_site"
+        run_pipeline(output_dir=out_dir, offline_mode=True)
+        html_file = out_dir / "index.html"
+        self.assertTrue(html_file.exists())
+        content = html_file.read_text(encoding="utf-8")
+
+        # Accessibility checks
+        self.assertIn('id="live-announcer"', content)
+        self.assertIn('aria-live="polite"', content)
+        self.assertIn('prefers-reduced-motion', content)
+        self.assertIn('mag-label-text', content)
+
+        # Scientific provenance checks
+        self.assertIn('id="modal-mmi"', content)
+        self.assertIn('id="modal-cdi"', content)
+        self.assertIn('id="modal-alert"', content)
+        self.assertIn('id="modal-status"', content)
+        self.assertIn('id="modal-network"', content)
+        self.assertIn('modal-btn-locate', content)
+        self.assertIn('tsunami.gov', content)
+
+        # Retina tiles check
+        self.assertIn('detectRetina', content)
+
+        # Seismic OSS check
+        self.assertIn('Seismic OSS', content)
 
 
 if __name__ == "__main__":

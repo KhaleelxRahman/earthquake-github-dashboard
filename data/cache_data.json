@@ -1,7 +1,547 @@
 {
-  "cached_at": "2026-11-01T08:53:59.335151+00:00",
+  "cached_at": "2026-11-02T18:52:19.830869+00:00",
   "source": "USGS GeoJSON & GitHub REST API Live Ingestion",
   "earthquakes": [
+    {
+      "id": "us7000tuxy",
+      "place": "81 km SSE of Palekastro, Greece",
+      "magnitude": 5.3,
+      "time_ms": 1793638157895,
+      "time_iso": "2026-11-02T16:49:17.895000+00:00",
+      "latitude": 34.4807,
+      "longitude": 26.4694,
+      "depth_km": 48.52,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuxy",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 432,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tuxi",
+      "place": "193 km ENE of Nagqu, China",
+      "magnitude": 4.7,
+      "time_ms": 1793633712369,
+      "time_iso": "2026-11-02T15:35:12.369000+00:00",
+      "latitude": 32.3376,
+      "longitude": 93.831,
+      "depth_km": 10.0,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuxi",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 340,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tuxg",
+      "place": "50 km WSW of Huarmey, Peru",
+      "magnitude": 5.1,
+      "time_ms": 1793633293954,
+      "time_iso": "2026-11-02T15:28:13.954000+00:00",
+      "latitude": -10.1699,
+      "longitude": -78.5994,
+      "depth_km": 67.24,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuxg",
+      "felt": 1,
+      "tsunami": 0,
+      "significance": 401,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 3.8,
+      "net": "us"
+    },
+    {
+      "id": "us7000tuwv",
+      "place": "south of the Fiji Islands",
+      "magnitude": 4.7,
+      "time_ms": 1793628323380,
+      "time_iso": "2026-11-02T14:05:23.380000+00:00",
+      "latitude": -25.6182,
+      "longitude": 179.6708,
+      "depth_km": 502.36,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuwv",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 340,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tuv8",
+      "place": "100 km SSE of Palekastro, Greece",
+      "magnitude": 4.7,
+      "time_ms": 1793609962968,
+      "time_iso": "2026-11-02T08:59:22.968000+00:00",
+      "latitude": 34.3232,
+      "longitude": 26.528,
+      "depth_km": 40.17,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuv8",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 340,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tuv5",
+      "place": "113 km SW of Basco, Philippines",
+      "magnitude": 4.7,
+      "time_ms": 1793608967228,
+      "time_iso": "2026-11-02T08:42:47.228000+00:00",
+      "latitude": 19.8007,
+      "longitude": 121.1252,
+      "depth_km": 35.0,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuv5",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 340,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tuuy",
+      "place": "19 km WNW of Tomohon, Indonesia",
+      "magnitude": 5.1,
+      "time_ms": 1793607194014,
+      "time_iso": "2026-11-02T08:13:14.014000+00:00",
+      "latitude": 1.392,
+      "longitude": 124.6476,
+      "depth_km": 196.65,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuuy",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 400,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tuu0",
+      "place": "175 km WNW of Panguna, Papua New Guinea",
+      "magnitude": 4.9,
+      "time_ms": 1793596790104,
+      "time_iso": "2026-11-02T05:19:50.104000+00:00",
+      "latitude": -5.5626,
+      "longitude": 154.088,
+      "depth_km": 87.89,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuu0",
+      "felt": 1,
+      "tsunami": 0,
+      "significance": 370,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 2.0,
+      "net": "us"
+    },
+    {
+      "id": "us7000tutv",
+      "place": "201 km NE of Kuril\u2019sk, Russia",
+      "magnitude": 4.6,
+      "time_ms": 1793594748110,
+      "time_iso": "2026-11-02T04:45:48.110000+00:00",
+      "latitude": 46.6019,
+      "longitude": 149.5786,
+      "depth_km": 10.0,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tutv",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 326,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tuts",
+      "place": "Mid-Indian Ridge",
+      "magnitude": 4.7,
+      "time_ms": 1793587427892,
+      "time_iso": "2026-11-02T02:43:47.892000+00:00",
+      "latitude": -35.9577,
+      "longitude": 78.0792,
+      "depth_km": 10.0,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuts",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 340,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tute",
+      "place": "135 km SW of Lorengau, Papua New Guinea",
+      "magnitude": 4.5,
+      "time_ms": 1793586243097,
+      "time_iso": "2026-11-02T02:24:03.097000+00:00",
+      "latitude": -2.9446,
+      "longitude": 146.4573,
+      "depth_km": 10.0,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tute",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 312,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tutf",
+      "place": "64 km SE of Yilan, Taiwan",
+      "magnitude": 4.5,
+      "time_ms": 1793586188566,
+      "time_iso": "2026-11-02T02:23:08.566000+00:00",
+      "latitude": 24.322,
+      "longitude": 122.1775,
+      "depth_km": 55.09,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tutf",
+      "felt": 0,
+      "tsunami": 0,
+      "significance": 312,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 1.0,
+      "net": "us"
+    },
+    {
+      "id": "us7000tuta",
+      "place": "288 km SSE of Muroto-misakicho, Japan",
+      "magnitude": 4.5,
+      "time_ms": 1793584495186,
+      "time_iso": "2026-11-02T01:54:55.186000+00:00",
+      "latitude": 30.8406,
+      "longitude": 135.1987,
+      "depth_km": 510.07,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuta",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 312,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tut4",
+      "place": "Kermadec Islands region",
+      "magnitude": 5.1,
+      "time_ms": 1793582296369,
+      "time_iso": "2026-11-02T01:18:16.369000+00:00",
+      "latitude": -31.2244,
+      "longitude": -177.7236,
+      "depth_km": 10.0,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tut4",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 400,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tusv",
+      "place": "Banda Sea",
+      "magnitude": 5.1,
+      "time_ms": 1793580790555,
+      "time_iso": "2026-11-02T00:53:10.555000+00:00",
+      "latitude": -6.9205,
+      "longitude": 129.9514,
+      "depth_km": 93.55,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tusv",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 400,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tus5",
+      "place": "86 km WNW of Abra Pampa, Argentina",
+      "magnitude": 4.5,
+      "time_ms": 1793575085811,
+      "time_iso": "2026-11-01T23:18:05.811000+00:00",
+      "latitude": -22.5661,
+      "longitude": -66.523,
+      "depth_km": 243.6,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tus5",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 312,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000turv",
+      "place": "Mid-Indian Ridge",
+      "magnitude": 4.6,
+      "time_ms": 1793571763980,
+      "time_iso": "2026-11-01T22:22:43.980000+00:00",
+      "latitude": -35.4346,
+      "longitude": 78.3627,
+      "depth_km": 10.0,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000turv",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 326,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000turj",
+      "place": "Kermadec Islands region",
+      "magnitude": 4.7,
+      "time_ms": 1793568417524,
+      "time_iso": "2026-11-01T21:26:57.524000+00:00",
+      "latitude": -27.291,
+      "longitude": -177.8708,
+      "depth_km": 150.95,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000turj",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 340,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tur0",
+      "place": "Mid-Indian Ridge",
+      "magnitude": 4.8,
+      "time_ms": 1793559237590,
+      "time_iso": "2026-11-01T18:53:57.590000+00:00",
+      "latitude": -35.441,
+      "longitude": 78.4169,
+      "depth_km": 10.0,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tur0",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 354,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tuqy",
+      "place": "101 km SW of Basco, Philippines",
+      "magnitude": 4.6,
+      "time_ms": 1793558577023,
+      "time_iso": "2026-11-01T18:42:57.023000+00:00",
+      "latitude": 19.7626,
+      "longitude": 121.328,
+      "depth_km": 38.49,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuqy",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 326,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tuqx",
+      "place": "Mid-Indian Ridge",
+      "magnitude": 5.0,
+      "time_ms": 1793558079200,
+      "time_iso": "2026-11-01T18:34:39.200000+00:00",
+      "latitude": -23.8735,
+      "longitude": 69.5217,
+      "depth_km": 10.0,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuqx",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 385,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tuqv",
+      "place": "Mid-Indian Ridge",
+      "magnitude": 4.6,
+      "time_ms": 1793557823197,
+      "time_iso": "2026-11-01T18:30:23.197000+00:00",
+      "latitude": -23.9496,
+      "longitude": 69.5065,
+      "depth_km": 10.0,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuqv",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 326,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tuqk",
+      "place": "South Sandwich Islands region",
+      "magnitude": 5.1,
+      "time_ms": 1793553116053,
+      "time_iso": "2026-11-01T17:11:56.053000+00:00",
+      "latitude": -56.2566,
+      "longitude": -27.1985,
+      "depth_km": 108.23,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuqk",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 400,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tuqi",
+      "place": "78 km SSE of Yonakuni, Japan",
+      "magnitude": 4.7,
+      "time_ms": 1793552478126,
+      "time_iso": "2026-11-01T17:01:18.126000+00:00",
+      "latitude": 23.8055,
+      "longitude": 123.2705,
+      "depth_km": 18.48,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuqi",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 340,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tupq",
+      "place": "203 km NW of Port-Olry, Vanuatu",
+      "magnitude": 4.8,
+      "time_ms": 1793534910561,
+      "time_iso": "2026-11-01T12:08:30.561000+00:00",
+      "latitude": -13.8667,
+      "longitude": 165.6199,
+      "depth_km": 10.0,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tupq",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 354,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tupp",
+      "place": "176 km NW of Port-Olry, Vanuatu",
+      "magnitude": 4.8,
+      "time_ms": 1793534211778,
+      "time_iso": "2026-11-01T11:56:51.778000+00:00",
+      "latitude": -14.0776,
+      "longitude": 165.767,
+      "depth_km": 10.0,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tupp",
+      "felt": null,
+      "tsunami": 0,
+      "significance": 354,
+      "status": "reviewed",
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
+    },
+    {
+      "id": "us7000tupl",
+      "place": "165 km NW of Port-Olry, Vanuatu",
+      "magnitude": 6.0,
+      "time_ms": 1793533623778,
+      "time_iso": "2026-11-01T11:47:03.778000+00:00",
+      "latitude": -14.1689,
+      "longitude": 165.8242,
+      "depth_km": 10.0,
+      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tupl",
+      "felt": 0,
+      "tsunami": 0,
+      "significance": 554,
+      "status": "reviewed",
+      "mag_type": "mww",
+      "mmi": 4.1,
+      "alert": "green",
+      "cdi": 1.0,
+      "net": "us"
+    },
     {
       "id": "us7000tunq",
       "place": "33 km SE of Jiufen, Taiwan",
@@ -12,11 +552,15 @@
       "longitude": 122.0621,
       "depth_km": 118.8,
       "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tunq",
-      "felt": 2,
+      "felt": 9,
       "tsunami": 0,
-      "significance": 355,
+      "significance": 358,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 3.8,
+      "net": "us"
     },
     {
       "id": "us7000tung",
@@ -32,7 +576,11 @@
       "tsunami": 0,
       "significance": 340,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tund",
@@ -48,7 +596,11 @@
       "tsunami": 0,
       "significance": 400,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tun8",
@@ -64,7 +616,11 @@
       "tsunami": 0,
       "significance": 449,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": 3.2,
+      "alert": "green",
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tumy",
@@ -80,7 +636,11 @@
       "tsunami": 0,
       "significance": 354,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tuly",
@@ -96,7 +656,11 @@
       "tsunami": 0,
       "significance": 312,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 2.0,
+      "net": "us"
     },
     {
       "id": "us7000tule",
@@ -112,7 +676,11 @@
       "tsunami": 0,
       "significance": 354,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tuky",
@@ -128,7 +696,11 @@
       "tsunami": 0,
       "significance": 416,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tuku",
@@ -140,11 +712,15 @@
       "longitude": 136.9854,
       "depth_km": 352.45,
       "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tuku",
-      "felt": 23,
+      "felt": 30,
       "tsunami": 0,
-      "significance": 561,
+      "significance": 563,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": 3.0,
+      "alert": "green",
+      "cdi": 3.1,
+      "net": "us"
     },
     {
       "id": "us7000tukm",
@@ -160,7 +736,11 @@
       "tsunami": 0,
       "significance": 385,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tuk4",
@@ -176,7 +756,11 @@
       "tsunami": 0,
       "significance": 312,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": 3.3,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "aka2026vpcige",
@@ -192,7 +776,11 @@
       "tsunami": 0,
       "significance": 312,
       "status": "reviewed",
-      "mag_type": "ml"
+      "mag_type": "ml",
+      "mmi": 3.0,
+      "alert": null,
+      "cdi": null,
+      "net": "ak"
     },
     {
       "id": "us7000tujf",
@@ -204,11 +792,15 @@
       "longitude": -80.2547,
       "depth_km": 10.0,
       "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000tujf",
-      "felt": 28,
+      "felt": 31,
       "tsunami": 0,
-      "significance": 431,
+      "significance": 433,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": null,
+      "alert": null,
+      "cdi": 5.4,
+      "net": "us"
     },
     {
       "id": "us7000tumt",
@@ -224,7 +816,11 @@
       "tsunami": 0,
       "significance": 312,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tuif",
@@ -240,7 +836,11 @@
       "tsunami": 0,
       "significance": 385,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tuht",
@@ -256,7 +856,11 @@
       "tsunami": 0,
       "significance": 369,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tuhs",
@@ -272,7 +876,11 @@
       "tsunami": 0,
       "significance": 369,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tugv",
@@ -288,7 +896,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tugs",
@@ -304,7 +916,11 @@
       "tsunami": 0,
       "significance": 312,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tugf",
@@ -320,7 +936,11 @@
       "tsunami": 0,
       "significance": 312,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tugd",
@@ -336,7 +956,11 @@
       "tsunami": 0,
       "significance": 354,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tufp",
@@ -352,7 +976,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tufc",
@@ -368,7 +996,11 @@
       "tsunami": 0,
       "significance": 340,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tudk",
@@ -384,7 +1016,11 @@
       "tsunami": 0,
       "significance": 312,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tub8",
@@ -400,7 +1036,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 2.1,
+      "net": "us"
     },
     {
       "id": "us7000tu83",
@@ -416,7 +1056,11 @@
       "tsunami": 0,
       "significance": 312,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tumn",
@@ -432,7 +1076,11 @@
       "tsunami": 0,
       "significance": 340,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tu7m",
@@ -448,7 +1096,11 @@
       "tsunami": 0,
       "significance": 340,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tu7k",
@@ -464,7 +1116,11 @@
       "tsunami": 0,
       "significance": 312,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tu7j",
@@ -480,7 +1136,11 @@
       "tsunami": 0,
       "significance": 400,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tu7b",
@@ -496,7 +1156,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tu6i",
@@ -512,7 +1176,11 @@
       "tsunami": 0,
       "significance": 354,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tu6f",
@@ -528,7 +1196,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tu5q",
@@ -544,7 +1216,11 @@
       "tsunami": 0,
       "significance": 400,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tu4z",
@@ -560,7 +1236,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 2.2,
+      "net": "us"
     },
     {
       "id": "us7000tu4f",
@@ -576,7 +1256,11 @@
       "tsunami": 0,
       "significance": 594,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": 4.2,
+      "alert": "green",
+      "cdi": 4.6,
+      "net": "us"
     },
     {
       "id": "us7000tu4a",
@@ -592,7 +1276,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tu46",
@@ -608,7 +1296,11 @@
       "tsunami": 0,
       "significance": 340,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tu3u",
@@ -624,7 +1316,11 @@
       "tsunami": 0,
       "significance": 385,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tu3j",
@@ -640,7 +1336,11 @@
       "tsunami": 0,
       "significance": 385,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": 3.0,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tu2j",
@@ -656,7 +1356,11 @@
       "tsunami": 0,
       "significance": 312,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttyw",
@@ -672,7 +1376,11 @@
       "tsunami": 0,
       "significance": 341,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 3.4,
+      "net": "us"
     },
     {
       "id": "us7000ttyk",
@@ -688,7 +1396,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttyd",
@@ -704,7 +1416,11 @@
       "tsunami": 0,
       "significance": 369,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tty7",
@@ -720,7 +1436,11 @@
       "tsunami": 0,
       "significance": 400,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 1.0,
+      "net": "us"
     },
     {
       "id": "us7000tty0",
@@ -736,7 +1456,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttxz",
@@ -752,7 +1476,11 @@
       "tsunami": 0,
       "significance": 630,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": null,
+      "alert": "green",
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttxn",
@@ -768,7 +1496,11 @@
       "tsunami": 0,
       "significance": 449,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": 3.2,
+      "alert": "green",
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttx8",
@@ -784,7 +1516,11 @@
       "tsunami": 0,
       "significance": 400,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttx0",
@@ -800,7 +1536,11 @@
       "tsunami": 0,
       "significance": 449,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": 3.0,
+      "alert": "green",
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttw5",
@@ -816,7 +1556,11 @@
       "tsunami": 0,
       "significance": 500,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": 7.1,
+      "alert": "green",
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttw3",
@@ -832,7 +1576,11 @@
       "tsunami": 0,
       "significance": 518,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": 3.7,
+      "alert": "green",
+      "cdi": 3.1,
+      "net": "us"
     },
     {
       "id": "us7000ttw2",
@@ -848,7 +1596,11 @@
       "tsunami": 0,
       "significance": 449,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": 3.3,
+      "alert": "green",
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttvy",
@@ -864,7 +1616,11 @@
       "tsunami": 0,
       "significance": 359,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 4.2,
+      "net": "us"
     },
     {
       "id": "us7000ttvs",
@@ -880,7 +1636,11 @@
       "tsunami": 0,
       "significance": 354,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttvn",
@@ -896,7 +1656,11 @@
       "tsunami": 0,
       "significance": 369,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttvf",
@@ -912,7 +1676,11 @@
       "tsunami": 0,
       "significance": 449,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": 6.3,
+      "alert": "green",
+      "cdi": 4.6,
+      "net": "us"
     },
     {
       "id": "us7000ttv1",
@@ -928,7 +1696,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttuq",
@@ -944,7 +1716,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttua",
@@ -960,7 +1736,11 @@
       "tsunami": 0,
       "significance": 500,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": 3.2,
+      "alert": "green",
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tttl",
@@ -976,7 +1756,11 @@
       "tsunami": 0,
       "significance": 432,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttth",
@@ -992,7 +1776,11 @@
       "tsunami": 0,
       "significance": 416,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttt4",
@@ -1008,7 +1796,11 @@
       "tsunami": 0,
       "significance": 340,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttt2",
@@ -1024,7 +1816,11 @@
       "tsunami": 0,
       "significance": 340,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 1.0,
+      "net": "us"
     },
     {
       "id": "us7000ttpk",
@@ -1040,7 +1836,11 @@
       "tsunami": 0,
       "significance": 340,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttpe",
@@ -1056,7 +1856,11 @@
       "tsunami": 0,
       "significance": 490,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": 5.3,
+      "alert": "green",
+      "cdi": 4.1,
+      "net": "us"
     },
     {
       "id": "us7000ttp7",
@@ -1072,7 +1876,11 @@
       "tsunami": 0,
       "significance": 312,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttp2",
@@ -1088,7 +1896,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttnz",
@@ -1104,7 +1916,11 @@
       "tsunami": 0,
       "significance": 385,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttnt",
@@ -1120,7 +1936,11 @@
       "tsunami": 0,
       "significance": 369,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttnq",
@@ -1136,7 +1956,11 @@
       "tsunami": 0,
       "significance": 369,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttnk",
@@ -1152,7 +1976,11 @@
       "tsunami": 0,
       "significance": 385,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttnc",
@@ -1168,7 +1996,11 @@
       "tsunami": 0,
       "significance": 465,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": null,
+      "alert": "green",
+      "cdi": 1.0,
+      "net": "us"
     },
     {
       "id": "us7000ttmz",
@@ -1184,7 +2016,11 @@
       "tsunami": 0,
       "significance": 355,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 2.0,
+      "net": "us"
     },
     {
       "id": "us7000ttmh",
@@ -1200,7 +2036,11 @@
       "tsunami": 0,
       "significance": 340,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 3.1,
+      "net": "us"
     },
     {
       "id": "us7000ttmb",
@@ -1216,7 +2056,11 @@
       "tsunami": 0,
       "significance": 385,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttm2",
@@ -1232,7 +2076,11 @@
       "tsunami": 0,
       "significance": 385,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttlt",
@@ -1248,7 +2096,11 @@
       "tsunami": 0,
       "significance": 482,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": 3.7,
+      "alert": "green",
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttlm",
@@ -1264,7 +2116,11 @@
       "tsunami": 0,
       "significance": 554,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": null,
+      "alert": "green",
+      "cdi": 1.0,
+      "net": "us"
     },
     {
       "id": "us7000ttlk",
@@ -1280,7 +2136,11 @@
       "tsunami": 0,
       "significance": 416,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttli",
@@ -1296,7 +2156,11 @@
       "tsunami": 0,
       "significance": 354,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttld",
@@ -1312,7 +2176,11 @@
       "tsunami": 0,
       "significance": 465,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": null,
+      "alert": "green",
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttlc",
@@ -1328,7 +2196,11 @@
       "tsunami": 0,
       "significance": 418,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 3.7,
+      "net": "us"
     },
     {
       "id": "us7000ttkk",
@@ -1344,7 +2216,11 @@
       "tsunami": 0,
       "significance": 403,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": null,
+      "alert": null,
+      "cdi": 3.9,
+      "net": "us"
     },
     {
       "id": "us7000ttke",
@@ -1360,7 +2236,11 @@
       "tsunami": 0,
       "significance": 449,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": null,
+      "alert": "green",
+      "cdi": 3.4,
+      "net": "us"
     },
     {
       "id": "us7000ttis",
@@ -1376,7 +2256,11 @@
       "tsunami": 0,
       "significance": 449,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": 6.6,
+      "alert": "green",
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tth4",
@@ -1392,7 +2276,11 @@
       "tsunami": 0,
       "significance": 369,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttgq",
@@ -1408,7 +2296,11 @@
       "tsunami": 0,
       "significance": 354,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttgm",
@@ -1424,7 +2316,11 @@
       "tsunami": 0,
       "significance": 385,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": null,
+      "alert": null,
+      "cdi": 3.4,
+      "net": "us"
     },
     {
       "id": "us7000ttgf",
@@ -1440,7 +2336,11 @@
       "tsunami": 0,
       "significance": 449,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": 3.5,
+      "alert": "green",
+      "cdi": 2.2,
+      "net": "us"
     },
     {
       "id": "us7000ttgh",
@@ -1456,7 +2356,11 @@
       "tsunami": 0,
       "significance": 369,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttgc",
@@ -1472,7 +2376,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttfx",
@@ -1488,7 +2396,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 3.4,
+      "net": "us"
     },
     {
       "id": "us7000ttfs",
@@ -1504,7 +2416,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttfm",
@@ -1520,7 +2436,11 @@
       "tsunami": 0,
       "significance": 312,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttfk",
@@ -1536,7 +2456,11 @@
       "tsunami": 0,
       "significance": 416,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttfj",
@@ -1552,7 +2476,11 @@
       "tsunami": 0,
       "significance": 385,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttfe",
@@ -1568,7 +2496,11 @@
       "tsunami": 0,
       "significance": 385,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttfc",
@@ -1584,7 +2516,11 @@
       "tsunami": 0,
       "significance": 385,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 2.2,
+      "net": "us"
     },
     {
       "id": "us7000ttfb",
@@ -1600,7 +2536,11 @@
       "tsunami": 0,
       "significance": 518,
       "status": "reviewed",
-      "mag_type": "mww"
+      "mag_type": "mww",
+      "mmi": 3.8,
+      "alert": "green",
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tte4",
@@ -1616,7 +2556,11 @@
       "tsunami": 0,
       "significance": 369,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000tte0",
@@ -1632,7 +2576,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttdt",
@@ -1648,7 +2596,11 @@
       "tsunami": 0,
       "significance": 354,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttd3",
@@ -1664,7 +2616,11 @@
       "tsunami": 0,
       "significance": 312,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttd1",
@@ -1680,7 +2636,11 @@
       "tsunami": 0,
       "significance": 312,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 2.0,
+      "net": "us"
     },
     {
       "id": "us7000ttci",
@@ -1696,7 +2656,11 @@
       "tsunami": 0,
       "significance": 353,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 3.8,
+      "net": "us"
     },
     {
       "id": "us7000ttc8",
@@ -1712,7 +2676,11 @@
       "tsunami": 0,
       "significance": 326,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 3.1,
+      "net": "us"
     },
     {
       "id": "us7000ttc6",
@@ -1728,7 +2696,11 @@
       "tsunami": 0,
       "significance": 312,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttbz",
@@ -1744,7 +2716,11 @@
       "tsunami": 0,
       "significance": 340,
       "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": null,
+      "net": "us"
     },
     {
       "id": "us7000ttbh",
@@ -1760,573 +2736,113 @@
       "tsunami": 0,
       "significance": 370,
       "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us7000ttb5",
-      "place": "74 km SE of Rasht, Tajikistan",
-      "magnitude": 4.5,
-      "time_ms": 1793038024209,
-      "time_iso": "2026-10-26T18:07:04.209000+00:00",
-      "latitude": 38.6442,
-      "longitude": 71.0764,
-      "depth_km": 47.34,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000ttb5",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 312,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us7000ttby",
-      "place": "154 km NW of Port-Olry, Vanuatu",
-      "magnitude": 4.6,
-      "time_ms": 1793027305118,
-      "time_iso": "2026-10-26T15:08:25.118000+00:00",
-      "latitude": -14.2093,
-      "longitude": 165.9223,
-      "depth_km": 10.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000ttby",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 326,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4zb",
-      "place": "205 km NW of Port-Olry, Vanuatu",
-      "magnitude": 5.2,
-      "time_ms": 1793016810652,
-      "time_iso": "2026-10-26T12:13:30.652000+00:00",
-      "latitude": -13.8613,
-      "longitude": 165.6029,
-      "depth_km": 10.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4zb",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 416,
-      "status": "reviewed",
-      "mag_type": "mww"
-    },
-    {
-      "id": "us6000u4z7",
-      "place": "81 km SSE of Akutan, Alaska",
-      "magnitude": 4.6,
-      "time_ms": 1793014686778,
-      "time_iso": "2026-10-26T11:38:06.778000+00:00",
-      "latitude": 53.5071,
-      "longitude": -165.1239,
-      "depth_km": 35.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4z7",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 326,
-      "status": "reviewed",
-      "mag_type": "mwr"
-    },
-    {
-      "id": "us6000u4z6",
-      "place": "218 km NW of Port-Olry, Vanuatu",
-      "magnitude": 5.0,
-      "time_ms": 1793013475055,
-      "time_iso": "2026-10-26T11:17:55.055000+00:00",
-      "latitude": -13.9396,
-      "longitude": 165.3858,
-      "depth_km": 10.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4z6",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 385,
-      "status": "reviewed",
-      "mag_type": "mww"
-    },
-    {
-      "id": "us6000u4z3",
-      "place": "South Sandwich Islands region",
-      "magnitude": 4.8,
-      "time_ms": 1793012515933,
-      "time_iso": "2026-10-26T11:01:55.933000+00:00",
-      "latitude": -59.8141,
-      "longitude": -27.7087,
-      "depth_km": 173.49,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4z3",
-      "felt": 0,
-      "tsunami": 0,
-      "significance": 354,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4yr",
-      "place": "283 km E of Levuka, Fiji",
-      "magnitude": 5.5,
-      "time_ms": 1793009581234,
-      "time_iso": "2026-10-26T10:13:01.234000+00:00",
-      "latitude": -18.283,
-      "longitude": -178.0109,
-      "depth_km": 641.81,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4yr",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 465,
-      "status": "reviewed",
-      "mag_type": "mww"
-    },
-    {
-      "id": "us6000u4yj",
-      "place": "56 km S of Kuril\u2019sk, Russia",
-      "magnitude": 4.5,
-      "time_ms": 1793002233644,
-      "time_iso": "2026-10-26T08:10:33.644000+00:00",
-      "latitude": 44.7225,
-      "longitude": 147.9339,
-      "depth_km": 139.44,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4yj",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 312,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4yi",
-      "place": "107 km WNW of Tumxuk, China",
-      "magnitude": 4.5,
-      "time_ms": 1793000896240,
-      "time_iso": "2026-10-26T07:48:16.240000+00:00",
-      "latitude": 40.2886,
-      "longitude": 77.9297,
-      "depth_km": 10.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4yi",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 312,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4y1",
-      "place": "45 km NNW of Ende, Indonesia",
-      "magnitude": 5.0,
-      "time_ms": 1792990420479,
-      "time_iso": "2026-10-26T04:53:40.479000+00:00",
-      "latitude": -8.443,
-      "longitude": 121.5729,
-      "depth_km": 10.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4y1",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 385,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4y2",
-      "place": "182 km NW of Port-Olry, Vanuatu",
-      "magnitude": 4.8,
-      "time_ms": 1792990415102,
-      "time_iso": "2026-10-26T04:53:35.102000+00:00",
-      "latitude": -14.0694,
-      "longitude": 165.6991,
-      "depth_km": 10.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4y2",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 354,
-      "status": "reviewed",
-      "mag_type": "mww"
-    },
-    {
-      "id": "us6000u4xp",
-      "place": "41 km WNW of Kupang, Indonesia",
-      "magnitude": 4.8,
-      "time_ms": 1792987162208,
-      "time_iso": "2026-10-26T03:59:22.208000+00:00",
-      "latitude": -10.0437,
-      "longitude": 123.2505,
-      "depth_km": 35.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4xp",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 354,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us7000ttnl",
-      "place": "207 km NW of Port-Olry, Vanuatu",
-      "magnitude": 4.7,
-      "time_ms": 1792979041577,
-      "time_iso": "2026-10-26T01:44:01.577000+00:00",
-      "latitude": -13.8739,
-      "longitude": 165.5699,
-      "depth_km": 10.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us7000ttnl",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 340,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4xa",
-      "place": "205 km NW of Port-Olry, Vanuatu",
-      "magnitude": 4.9,
-      "time_ms": 1792977740998,
-      "time_iso": "2026-10-26T01:22:20.998000+00:00",
-      "latitude": -13.8803,
-      "longitude": 165.5831,
-      "depth_km": 10.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4xa",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 369,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4wi",
-      "place": "Bonin Islands, Japan region",
-      "magnitude": 4.8,
-      "time_ms": 1792966587821,
-      "time_iso": "2026-10-25T22:16:27.821000+00:00",
-      "latitude": 27.8494,
-      "longitude": 139.7272,
-      "depth_km": 482.18,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4wi",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 354,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4we",
-      "place": "Bonin Islands, Japan region",
-      "magnitude": 5.3,
-      "time_ms": 1792966456010,
-      "time_iso": "2026-10-25T22:14:16.010000+00:00",
-      "latitude": 27.8572,
-      "longitude": 139.6916,
-      "depth_km": 485.13,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4we",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 432,
-      "status": "reviewed",
-      "mag_type": "mww"
-    },
-    {
-      "id": "us6000u4wc",
-      "place": "170 km ENE of Nagqu, China",
-      "magnitude": 4.7,
-      "time_ms": 1792965695793,
-      "time_iso": "2026-10-25T22:01:35.793000+00:00",
-      "latitude": 32.23,
-      "longitude": 93.6303,
-      "depth_km": 10.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4wc",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 340,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4vy",
-      "place": "167 km WNW of Port-Olry, Vanuatu",
-      "magnitude": 4.8,
-      "time_ms": 1792960242515,
-      "time_iso": "2026-10-25T20:30:42.515000+00:00",
-      "latitude": -14.2065,
-      "longitude": 165.7734,
-      "depth_km": 10.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4vy",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 354,
-      "status": "reviewed",
-      "mag_type": "mww"
-    },
-    {
-      "id": "us6000u4vb",
-      "place": "153 km WNW of Adak, Alaska",
-      "magnitude": 4.6,
-      "time_ms": 1792950598419,
-      "time_iso": "2026-10-25T17:49:58.419000+00:00",
-      "latitude": 52.1923,
-      "longitude": -178.8056,
-      "depth_km": 152.9,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4vb",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 326,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4va",
-      "place": "59 km SW of Ashk\u0101sham, Afghanistan",
-      "magnitude": 5.2,
-      "time_ms": 1792950263735,
-      "time_iso": "2026-10-25T17:44:23.735000+00:00",
-      "latitude": 36.274,
-      "longitude": 71.1025,
-      "depth_km": 110.03,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4va",
-      "felt": 6,
-      "tsunami": 0,
-      "significance": 418,
-      "status": "reviewed",
-      "mag_type": "mww"
-    },
-    {
-      "id": "us6000u4v1",
-      "place": "19 km NE of Atico, Peru",
-      "magnitude": 4.7,
-      "time_ms": 1792948309932,
-      "time_iso": "2026-10-25T17:11:49.932000+00:00",
-      "latitude": -16.0993,
-      "longitude": -73.4741,
-      "depth_km": 62.09,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4v1",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 340,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4ux",
-      "place": "203 km ENE of Nagqu, China",
-      "magnitude": 4.5,
-      "time_ms": 1792946808312,
-      "time_iso": "2026-10-25T16:46:48.312000+00:00",
-      "latitude": 32.5003,
-      "longitude": 93.8391,
-      "depth_km": 10.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4ux",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 312,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4uv",
-      "place": "222 km NW of Port-Olry, Vanuatu",
-      "magnitude": 4.6,
-      "time_ms": 1792945545745,
-      "time_iso": "2026-10-25T16:25:45.745000+00:00",
-      "latitude": -13.9253,
-      "longitude": 165.3571,
-      "depth_km": 10.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4uv",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 326,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4ue",
-      "place": "south of the Fiji Islands",
-      "magnitude": 4.6,
-      "time_ms": 1792936464782,
-      "time_iso": "2026-10-25T13:54:24.782000+00:00",
-      "latitude": -24.6285,
-      "longitude": 179.9035,
-      "depth_km": 513.91,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4ue",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 326,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4u2",
-      "place": "155 km WSW of Ternate, Indonesia",
-      "magnitude": 4.6,
-      "time_ms": 1792930145522,
-      "time_iso": "2026-10-25T12:09:05.522000+00:00",
-      "latitude": 0.1306,
-      "longitude": 126.1478,
-      "depth_km": 43.81,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4u2",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 326,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4ty",
-      "place": "218 km ENE of Nagqu, China",
-      "magnitude": 5.9,
-      "time_ms": 1792927557101,
-      "time_iso": "2026-10-25T11:25:57.101000+00:00",
-      "latitude": 32.4625,
-      "longitude": 94.0534,
-      "depth_km": 7.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4ty",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 536,
-      "status": "reviewed",
-      "mag_type": "mww"
-    },
-    {
-      "id": "us6000u4tx",
-      "place": "199 km ENE of Nagqu, China",
-      "magnitude": 5.1,
-      "time_ms": 1792927454089,
-      "time_iso": "2026-10-25T11:24:14.089000+00:00",
-      "latitude": 32.3695,
-      "longitude": 93.8872,
-      "depth_km": 10.0,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4tx",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 400,
-      "status": "reviewed",
-      "mag_type": "mb"
-    },
-    {
-      "id": "us6000u4tq",
-      "place": "33 km ESE of Ambunti, Papua New Guinea",
-      "magnitude": 5.4,
-      "time_ms": 1792924227588,
-      "time_iso": "2026-10-25T10:30:27.588000+00:00",
-      "latitude": -4.3644,
-      "longitude": 143.0843,
-      "depth_km": 72.35,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4tq",
-      "felt": 1,
-      "tsunami": 0,
-      "significance": 449,
-      "status": "reviewed",
-      "mag_type": "mww"
-    },
-    {
-      "id": "us6000u4tf",
-      "place": "Volcano Islands, Japan region",
-      "magnitude": 4.6,
-      "time_ms": 1792919477412,
-      "time_iso": "2026-10-25T09:11:17.412000+00:00",
-      "latitude": 22.5515,
-      "longitude": 142.9691,
-      "depth_km": 133.08,
-      "url": "https://earthquake.usgs.gov/earthquakes/eventpage/us6000u4tf",
-      "felt": null,
-      "tsunami": 0,
-      "significance": 326,
-      "status": "reviewed",
-      "mag_type": "mb"
+      "mag_type": "mb",
+      "mmi": null,
+      "alert": null,
+      "cdi": 2.5,
+      "net": "us"
     }
   ],
   "repositories": [
     {
-      "name": "public-apis",
-      "full_name": "public-apis/public-apis",
-      "stars": 493905,
-      "forks": 55141,
-      "description": "A collective list of free APIs",
-      "url": "https://github.com/public-apis/public-apis",
+      "name": "obspy",
+      "full_name": "obspy/obspy",
+      "stars": 1343,
+      "forks": 578,
+      "description": "ObsPy: A Python Toolbox for seismology/seismological observatories.",
+      "url": "https://github.com/obspy/obspy",
       "language": "Python",
-      "updated_at": "2026-11-01T09:53:00Z"
+      "updated_at": "2026-10-29T12:16:57Z"
     },
     {
-      "name": "free-programming-books",
-      "full_name": "EbookFoundation/free-programming-books",
-      "stars": 400639,
-      "forks": 67049,
-      "description": ":books: Freely available programming books",
-      "url": "https://github.com/EbookFoundation/free-programming-books",
+      "name": "pygmt",
+      "full_name": "GenericMappingTools/pygmt",
+      "stars": 880,
+      "forks": 259,
+      "description": "A Python interface for the Generic Mapping Tools.",
+      "url": "https://github.com/GenericMappingTools/pygmt",
       "language": "Python",
-      "updated_at": "2026-11-01T09:32:25Z"
+      "updated_at": "2026-10-31T01:42:50Z"
     },
     {
-      "name": "system-design-primer",
-      "full_name": "donnemartin/system-design-primer",
-      "stars": 376383,
-      "forks": 59107,
-      "description": "Learn how to design large-scale systems. Prep for the system design interview.  Includes Anki flashcards.",
-      "url": "https://github.com/donnemartin/system-design-primer",
+      "name": "bruges",
+      "full_name": "agilescientific/bruges",
+      "stars": 320,
+      "forks": 117,
+      "description": "Bag of really useful geoscience equations and stuff",
+      "url": "https://github.com/agilescientific/bruges",
       "language": "Python",
-      "updated_at": "2026-11-01T09:35:14Z"
+      "updated_at": "2026-10-29T10:30:19Z"
     },
     {
-      "name": "awesome-python",
-      "full_name": "vinta/awesome-python",
-      "stars": 331680,
-      "forks": 29044,
-      "description": "The definitive list that answers &quot;I want to do X in Python, which tool should I use?&quot;",
-      "url": "https://github.com/vinta/awesome-python",
+      "name": "pyrocko",
+      "full_name": "pyrocko/pyrocko",
+      "stars": 252,
+      "forks": 90,
+      "description": "An official read-only mirror of https://git.pyrocko.org/pyrocko/pyrocko. A seismology toolkit for Python.",
+      "url": "https://github.com/pyrocko/pyrocko",
       "language": "Python",
-      "updated_at": "2026-11-01T09:43:53Z"
+      "updated_at": "2026-10-21T05:36:12Z"
     },
     {
-      "name": "project-based-learning",
-      "full_name": "practical-tutorials/project-based-learning",
-      "stars": 288628,
-      "forks": 36777,
-      "description": "Curated list of project-based tutorials",
-      "url": "https://github.com/practical-tutorials/project-based-learning",
+      "name": "fatiando",
+      "full_name": "fatiando/fatiando",
+      "stars": 226,
+      "forks": 121,
+      "description": "DEPRECATED in favor of our newer libraries (see www.fatiando.org). Python toolkit for modeling and inversion in geophysics.",
+      "url": "https://github.com/fatiando/fatiando",
       "language": "Python",
-      "updated_at": "2026-11-01T09:49:02Z"
+      "updated_at": "2026-09-25T03:34:03Z"
     },
     {
-      "name": "hermes-agent",
-      "full_name": "NousResearch/hermes-agent",
-      "stars": 259295,
-      "forks": 57036,
-      "description": "The agent that grows with you",
-      "url": "https://github.com/NousResearch/hermes-agent",
+      "name": "MSNoise",
+      "full_name": "ROBelgium/MSNoise",
+      "stars": 215,
+      "forks": 95,
+      "description": "A Python Package for Monitoring Seismic Velocity Changes using Ambient Seismic Noise | http://www.msnoise.org",
+      "url": "https://github.com/ROBelgium/MSNoise",
       "language": "Python",
-      "updated_at": "2026-11-01T09:52:43Z"
+      "updated_at": "2026-10-25T02:55:33Z"
     },
     {
-      "name": "Python",
-      "full_name": "TheAlgorithms/Python",
-      "stars": 225750,
-      "forks": 51263,
-      "description": "All Algorithms implemented in Python",
-      "url": "https://github.com/TheAlgorithms/Python",
+      "name": "disba",
+      "full_name": "keurfonluu/disba",
+      "stars": 196,
+      "forks": 40,
+      "description": "Numba-accelerated computation of surface wave dispersion",
+      "url": "https://github.com/keurfonluu/disba",
       "language": "Python",
-      "updated_at": "2026-11-01T09:40:16Z"
+      "updated_at": "2026-10-21T02:30:32Z"
     },
     {
-      "name": "yt-dlp",
-      "full_name": "yt-dlp/yt-dlp",
-      "stars": 204323,
-      "forks": 17954,
-      "description": "A feature-rich command-line audio/video downloader",
-      "url": "https://github.com/yt-dlp/yt-dlp",
+      "name": "EQcorrscan",
+      "full_name": "eqcorrscan/EQcorrscan",
+      "stars": 190,
+      "forks": 91,
+      "description": "Earthquake detection and analysis in Python.",
+      "url": "https://github.com/eqcorrscan/EQcorrscan",
       "language": "Python",
-      "updated_at": "2026-11-01T09:45:14Z"
+      "updated_at": "2026-10-25T00:07:59Z"
     },
     {
-      "name": "markitdown",
-      "full_name": "microsoft/markitdown",
-      "stars": 193300,
-      "forks": 14485,
-      "description": "Python tool for converting files and office documents to Markdown.",
-      "url": "https://github.com/microsoft/markitdown",
+      "name": "dascore",
+      "full_name": "DASDAE/dascore",
+      "stars": 174,
+      "forks": 45,
+      "description": "A python library for distributed fiber optic sensing",
+      "url": "https://github.com/DASDAE/dascore",
       "language": "Python",
-      "updated_at": "2026-11-01T09:51:40Z"
+      "updated_at": "2026-11-02T12:24:15Z"
     },
     {
-      "name": "AutoGPT",
-      "full_name": "Significant-Gravitas/AutoGPT",
-      "stars": 187852,
-      "forks": 45903,
-      "description": "AutoGPT is the vision of accessible AI for everyone, to use and to build on. Our mission is to provide the tools, so that you can focus on what matters.",
-      "url": "https://github.com/Significant-Gravitas/AutoGPT",
+      "name": "QuakeMigrate",
+      "full_name": "QuakeMigrate/QuakeMigrate",
+      "stars": 173,
+      "forks": 43,
+      "description": "A Python package for automatic earthquake detection and location using waveform migration and stacking.",
+      "url": "https://github.com/QuakeMigrate/QuakeMigrate",
       "language": "Python",
-      "updated_at": "2026-11-01T09:46:44Z"
+      "updated_at": "2026-09-25T03:00:11Z"
     }
   ]
 }

@@ -88,6 +88,9 @@ def validate_output_html(file_path: Path) -> bool:
     if size < 20000:
         logger.error("Validation failed: file size %d bytes is below 20KB threshold.", size)
         return False
+    if size > 1500000:
+        logger.error("Validation failed: file size %d bytes exceeds 1.5MB safety threshold.", size)
+        return False
 
     try:
         content = file_path.read_text(encoding="utf-8")
@@ -136,11 +139,13 @@ def run_pipeline(
     feed_key: str = "4.5_week",
     output_dir: Optional[Path] = None,
     github_token: Optional[str] = None,
+    google_maps_api_key: Optional[str] = None,
     offline_mode: bool = False,
 ) -> int:
     """Execute the full data pipeline and generate the dashboard."""
     logger.info("Initializing QuakeScope pipeline execution.")
     token = github_token or os.environ.get("GITHUB_TOKEN")
+    gmaps_key = (google_maps_api_key or os.environ.get("GOOGLE_MAPS_API_KEY", "")).strip()
 
     earthquakes: List[Dict[str, Any]] = []
     repositories: List[Dict[str, Any]] = []
@@ -212,6 +217,7 @@ def run_pipeline(
         repositories=repositories,
         analytics=analytics,
         freshness=freshness,
+        config={"googleMapsApiKey": gmaps_key},
     )
 
     # Determine targets
@@ -256,6 +262,12 @@ def main() -> None:
         help="USGS GeoJSON feed identifier",
     )
     parser.add_argument(
+        "--google-maps-key",
+        type=str,
+        default=None,
+        help="Optional Google Maps JavaScript API key for interactive map features",
+    )
+    parser.add_argument(
         "--offline",
         action="store_true",
         help="Run in offline mode using cached baseline",
@@ -280,6 +292,7 @@ def main() -> None:
     exit_code = run_pipeline(
         feed_key=args.feed,
         output_dir=args.output_dir,
+        google_maps_api_key=args.google_maps_key,
         offline_mode=args.offline,
     )
     sys.exit(exit_code)

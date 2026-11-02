@@ -255,6 +255,39 @@ def parse_earthquake_features(data: dict) -> List[Dict[str, Any]]:
         sig = properties.get("sig")
         status = properties.get("status")
         mag_type = properties.get("magType")
+        raw_mmi = properties.get("mmi")
+        raw_alert = properties.get("alert")
+        raw_cdi = properties.get("cdi")
+        raw_net = properties.get("net")
+
+        # ShakeMap Instrumental Intensity (MMI, 1.0 to 12.0)
+        f_mmi = None
+        if raw_mmi is not None:
+            try:
+                val = float(raw_mmi)
+                if not math.isnan(val) and not math.isinf(val) and 1.0 <= val <= 12.0:
+                    f_mmi = round(val, 1)
+            except (ValueError, TypeError):
+                pass
+
+        # Official USGS PAGER Alert level ('green', 'yellow', 'orange', 'red')
+        s_alert = None
+        if raw_alert is not None and isinstance(raw_alert, str):
+            clean_alert = raw_alert.strip().lower()
+            if clean_alert in ("green", "yellow", "orange", "red"):
+                s_alert = clean_alert
+
+        # Community Decimal Intensity from Did You Feel It? (CDI, 1.0 to 12.0)
+        f_cdi = None
+        if raw_cdi is not None:
+            try:
+                val = float(raw_cdi)
+                if not math.isnan(val) and not math.isinf(val) and 1.0 <= val <= 12.0:
+                    f_cdi = round(val, 1)
+            except (ValueError, TypeError):
+                pass
+
+        s_net = sanitize_text(raw_net, default="us").lower()
 
         record = {
             "id": feat_id or f"quake-{f_lat}-{f_lon}-{timestamp_ms}",
@@ -266,11 +299,15 @@ def parse_earthquake_features(data: dict) -> List[Dict[str, Any]]:
             "longitude": f_lon,
             "depth_km": f_depth,
             "url": url,
-            "felt": int(felt) if felt is not None and isinstance(felt, (int, float)) else None,
+            "felt": int(felt) if felt is not None and isinstance(felt, (int, float)) and felt >= 0 else None,
             "tsunami": int(tsunami) if tsunami in (0, 1) else 0,
             "significance": int(sig) if sig is not None and isinstance(sig, (int, float)) else None,
-            "status": sanitize_text(status, default="reviewed"),
-            "mag_type": sanitize_text(mag_type, default=""),
+            "status": sanitize_text(status, default="reviewed").lower(),
+            "mag_type": sanitize_text(mag_type, default="").lower(),
+            "mmi": f_mmi,
+            "alert": s_alert,
+            "cdi": f_cdi,
+            "net": s_net,
         }
 
         if feat_id:
@@ -284,7 +321,7 @@ def parse_earthquake_features(data: dict) -> List[Dict[str, Any]]:
 
 
 def fetch_top_repositories_raw(token: Optional[str] = None) -> Tuple[Optional[dict], str]:
-    """Fetch top Python repositories from GitHub Search API."""
+    """Fetch top seismology, earthquake, and geospatial Python repositories from GitHub Search API."""
     headers: Dict[str, str] = {
         "Accept": "application/vnd.github.v3+json",
     }
@@ -292,13 +329,13 @@ def fetch_top_repositories_raw(token: Optional[str] = None) -> Tuple[Optional[di
         headers["Authorization"] = f"token {token}"
 
     params = {
-        "q": "language:python",
+        "q": "topic:seismology language:python",
         "sort": "stars",
         "order": "desc",
         "per_page": 10,
     }
-    logger.info("Fetching popular Python repositories from GitHub Search API.")
-    response = request_with_retry(GITHUB_SEARCH_URL, params=params, headers=headers)
+    logger.info("Fetching seismology and geospatial Python repositories from GitHub Search API.")
+    response = request_with_retry(GITHUB_SEARCH_URL, params=params, headers=headers, timeout=7)
 
     if response is None:
         return None, "Network failure or timeout contacting GitHub API"
