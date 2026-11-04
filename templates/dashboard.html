@@ -54,6 +54,20 @@
       --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
     }
 
+    body.light-theme {
+      --bg-base: #f8fafc;
+      --bg-surface: #ffffff;
+      --bg-card: #f1f5f9;
+      --bg-card-hover: #e2e8f0;
+      --border: rgba(0, 0, 0, 0.12);
+      --border-accent: rgba(14, 165, 233, 0.6);
+      --text-main: #0f172a;
+      --text-muted: #475569;
+      --text-dim: #64748b;
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -965,6 +979,9 @@
         <button id="btn-tz-toggle" class="btn" title="Toggle UTC or Local Browser Time">
           <span id="tz-label">UTC</span>
         </button>
+        <button id="btn-theme-toggle" class="btn" title="Toggle Scientific Dark / Paper Light Mode">
+          <span id="theme-icon">🌙</span> <span id="theme-label">Theme</span>
+        </button>
       </div>
     </div>
   </header>
@@ -1021,6 +1038,16 @@
           <div id="kpi-active-region" class="kpi-value" style="font-size: 1.25rem;">--</div>
           <div class="kpi-subtext">Seismic hotspot</div>
         </div>
+        <div class="kpi-card accent-teal">
+          <div class="kpi-label">Cumulative Energy (&Sigma;E)</div>
+          <div id="kpi-energy" class="kpi-value" style="font-size: 1.25rem;">--</div>
+          <div class="kpi-subtext" id="kpi-energy-sub">Joules &bull; TNT Equiv</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label">Gutenberg-Richter b-Value</div>
+          <div id="kpi-b-val" class="kpi-value">--</div>
+          <div class="kpi-subtext" id="kpi-b-sub">Exploratory Aki (1965) MLE slope; not a forecast</div>
+        </div>
       </div>
 
       <!-- Quick Map Preview & Recent Feed -->
@@ -1070,6 +1097,7 @@
                 <option value="deep">Deep (&ge;300km)</option>
               </select>
             </label>
+            <button id="btn-toggle-plates" class="btn active" title="Toggle Tectonic Plate Boundaries (Bird 2003)">🌋 Plates: ON</button>
             <button id="btn-reset-map" class="btn">Reset View</button>
             <button id="btn-fullscreen-map" class="btn">Fullscreen</button>
           </div>
@@ -1081,6 +1109,13 @@
         <!-- Provider Map Containers -->
         <div id="quake-map"></div>
         <div id="quake-google-map" style="display: none;"></div>
+
+        <!-- Timeline Playback Scrubber -->
+        <div class="time-scrubber-bar" style="margin-top: 0.6rem; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0.5rem 0.85rem; display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;">
+          <button id="btn-play-timeline" class="btn btn-primary" type="button" style="padding: 0.25rem 0.65rem; font-size: 0.78rem;">▶ Play</button>
+          <input type="range" id="time-slider" min="0" max="100" value="100" style="flex: 1; cursor: pointer; min-width: 150px;" aria-label="Chronological earthquake time scrubber">
+          <span id="time-slider-label" style="font-size: 0.78rem; font-variant-numeric: tabular-nums; color: var(--text-muted); min-width: 140px; text-align: right;">All Events (Latest)</span>
+        </div>
 
         <!-- Coordinates HUD -->
         <div id="map-coords" class="map-hud">Lat: --, Lon: --</div>
@@ -1352,6 +1387,14 @@
       let googleInfoWindow = null;
       let googleMapsLoaded = false;
       let googleMapsAuthFailed = false;
+
+      // Tectonic Plates and Timeline Scrubber State
+      let showTectonicPlates = true;
+      let tectonicLayer = null;
+      let timelinePercent = 100;
+      let isPlayingTimeline = false;
+      let timelineInterval = null;
+      let canvasRenderer = null;
 
       // Google Maps Dark Theme Styling
       const googleMapsDarkTheme = [
@@ -1730,6 +1773,99 @@
           updateMapPopups();
         });
 
+        // Theme Toggle
+        const themeBtn = document.getElementById("btn-theme-toggle");
+        if (themeBtn) {
+          themeBtn.addEventListener("click", () => {
+            const isLight = document.body.classList.toggle("light-theme");
+            document.getElementById("theme-icon").textContent = isLight ? "☀️" : "🌙";
+            document.getElementById("theme-label").textContent = isLight ? "Light" : "Dark";
+            try { localStorage.setItem("quakescope_theme", isLight ? "light" : "dark"); } catch (e) {}
+            renderAnalyticsCharts();
+          });
+          try {
+            if (localStorage.getItem("quakescope_theme") === "light") {
+              document.body.classList.add("light-theme");
+              document.getElementById("theme-icon").textContent = "☀️";
+              document.getElementById("theme-label").textContent = "Light";
+            }
+          } catch (e) {}
+        }
+
+        // Tectonic Plates Toggle
+        const platesBtn = document.getElementById("btn-toggle-plates");
+        if (platesBtn) {
+          platesBtn.addEventListener("click", () => {
+            showTectonicPlates = !showTectonicPlates;
+            platesBtn.classList.toggle("active", showTectonicPlates);
+            platesBtn.textContent = showTectonicPlates ? "🌋 Plates: ON" : "🌋 Plates: OFF";
+            if (tectonicLayer && mapInstance) {
+              if (showTectonicPlates) {
+                tectonicLayer.addTo(mapInstance);
+              } else {
+                mapInstance.removeLayer(tectonicLayer);
+              }
+            }
+          });
+        }
+
+        // Timeline Scrubber & Playback
+        const timeSlider = document.getElementById("time-slider");
+        const timeLabel = document.getElementById("time-slider-label");
+        const playBtn = document.getElementById("btn-play-timeline");
+
+        if (timeSlider) {
+          timeSlider.addEventListener("input", (e) => {
+            timelinePercent = parseInt(e.target.value, 10);
+            updateTimelineScrubber();
+          });
+        }
+        if (playBtn) {
+          playBtn.addEventListener("click", () => {
+            if (isPlayingTimeline) {
+              stopTimelinePlayback();
+            } else {
+              startTimelinePlayback();
+            }
+          });
+        }
+
+        function startTimelinePlayback() {
+          isPlayingTimeline = true;
+          playBtn.textContent = "⏸ Pause";
+          if (timelinePercent >= 100) {
+            timelinePercent = 10;
+            if (timeSlider) timeSlider.value = timelinePercent;
+          }
+          timelineInterval = setInterval(() => {
+            timelinePercent += 2;
+            if (timelinePercent >= 100) {
+              timelinePercent = 100;
+              if (timeSlider) timeSlider.value = 100;
+              stopTimelinePlayback();
+            } else {
+              if (timeSlider) timeSlider.value = timelinePercent;
+            }
+            updateTimelineScrubber();
+          }, 120);
+        }
+
+        function stopTimelinePlayback() {
+          isPlayingTimeline = false;
+          playBtn.textContent = "▶ Play";
+          if (timelineInterval) {
+            clearInterval(timelineInterval);
+            timelineInterval = null;
+          }
+        }
+
+        function updateTimelineScrubber() {
+          if (timeLabel) {
+            timeLabel.textContent = timelinePercent >= 100 ? "All Events (Latest)" : `Earliest ${timelinePercent}%`;
+          }
+          updateMapMarkers();
+        }
+
         const refreshBtn = document.getElementById("btn-refresh");
         refreshBtn.addEventListener("click", () => {
           fetchLiveFeed();
@@ -1889,6 +2025,63 @@
         document.getElementById("kpi-strong").textContent = strongCount.toLocaleString();
         document.getElementById("kpi-shallow").textContent = shallowCount.toLocaleString();
         document.getElementById("kpi-active-region").textContent = topRegion;
+
+        // Scientific Seismology: Cumulative Radiated Energy E = 10^(4.8 + 1.5M)
+        let totalJoules = 0;
+        const mags = [];
+        earthquakes.forEach(e => {
+          const m = e.magnitude;
+          mags.push(m);
+          totalJoules += Math.pow(10, 4.8 + 1.5 * m);
+        });
+
+        const energyEl = document.getElementById("kpi-energy");
+        const energySub = document.getElementById("kpi-energy-sub");
+        if (energyEl) {
+          if (totalJoules >= 1e18) {
+            energyEl.textContent = (totalJoules / 1e18).toFixed(2) + " EJ";
+          } else if (totalJoules >= 1e15) {
+            energyEl.textContent = (totalJoules / 1e15).toFixed(2) + " PJ";
+          } else if (totalJoules >= 1e12) {
+            energyEl.textContent = (totalJoules / 1e12).toFixed(2) + " TJ";
+          } else {
+            energyEl.textContent = (totalJoules / 1e9).toFixed(2) + " GJ";
+          }
+          const tntTons = totalJoules / 4.184e9;
+          if (energySub) {
+            energySub.textContent = `≈ ${tntTons >= 1e6 ? (tntTons / 1e6).toFixed(2) + ' Mt' : Math.round(tntTons).toLocaleString()} TNT Equiv`;
+          }
+        }
+
+        // Gutenberg-Richter Aki (1965) MLE b-value
+        // DISCLAIMER: Strictly descriptive/exploratory metric of catalog frequency distribution.
+        // Not an earthquake prediction, rupture probability, or official forecast.
+        const bEl = document.getElementById("kpi-b-val");
+        const bSub = document.getElementById("kpi-b-sub");
+        if (bEl) {
+          if (mags.length >= 15) {
+            const minMag = Math.min(...mags);
+            const meanMag = mags.reduce((a, b) => a + b, 0) / mags.length;
+            const deltaM = 0.1;
+            const denom = meanMag - (minMag - deltaM / 2.0);
+            if (denom > 0.001) {
+              const bVal = 0.43429448 / denom;
+              const stdErr = bVal / Math.sqrt(mags.length);
+              bEl.textContent = bVal.toFixed(2);
+              if (bSub) {
+                bSub.innerHTML = `Aki MLE &plusmn;${stdErr.toFixed(2)} (N=${mags.length}, M<sub>c</sub>&ge;${minMag.toFixed(1)}, &Delta;M=0.1). Exploratory; not a forecast.`;
+              }
+            } else {
+              bEl.textContent = "N/A";
+              if (bSub) bSub.textContent = "Insufficient magnitude variance";
+            }
+          } else {
+            bEl.textContent = "N/A*";
+            if (bSub) {
+              bSub.innerHTML = `<span title="Requires at least N >= 15 events above completeness threshold (Mc) for statistical estimation (Aki 1965, &Delta;M=0.1)">Insufficient data (N=${mags.length} &lt; 15, exploratory only)</span>`;
+            }
+          }
+        }
       }
 
       // Overview recent earthquakes feed
@@ -2109,6 +2302,33 @@
 
         mapMarkersLayer = L.layerGroup().addTo(mapInstance);
 
+        // Hardware-accelerated HTML5 Canvas renderer for responsive cluster marker drawing
+        canvasRenderer = L.canvas({ padding: 0.5 });
+
+        // Tectonic Plate Boundaries Layer (Peter Bird 2003 model)
+        if (rawData.tectonicPlates && typeof L.geoJSON !== "undefined") {
+          try {
+            tectonicLayer = L.geoJSON(rawData.tectonicPlates, {
+              style: {
+                color: "#f59e0b",
+                weight: 2,
+                opacity: 0.8,
+                dashArray: "5, 5"
+              },
+              onEachFeature: function(feature, layer) {
+                if (feature.properties && feature.properties.name) {
+                  layer.bindTooltip(`<strong>Tectonic Boundary</strong><br>${escapeHtml(feature.properties.name)}<br><span style="font-size:0.75rem; color:#f59e0b;">${escapeHtml(feature.properties.type || "active")}</span>`, { sticky: true });
+                }
+              }
+            });
+            if (showTectonicPlates) {
+              tectonicLayer.addTo(mapInstance);
+            }
+          } catch (e) {
+            console.warn("Could not render tectonic plate boundaries", e);
+          }
+        }
+
         mapInstance.on("mousemove", (e) => {
           document.getElementById("map-coords").textContent = `Lat: ${e.latlng.lat.toFixed(4)}, Lon: ${e.latlng.lng.toFixed(4)}`;
         });
@@ -2207,7 +2427,18 @@
         const magThreshold = parseFloat(document.getElementById("map-filter-mag").value) || 0.0;
         const depthFilter = document.getElementById("map-filter-depth").value;
 
-        earthquakes.forEach(e => {
+        // Apply timeline percentage filter
+        let visibleQuakes = earthquakes;
+        if (timelinePercent < 100) {
+          const sortedAsc = [...earthquakes].sort((a, b) => a.time_ms - b.time_ms);
+          const count = Math.max(1, Math.round((sortedAsc.length * timelinePercent) / 100));
+          visibleQuakes = sortedAsc.slice(0, count);
+        }
+
+        const now = Date.now();
+        const twoHoursMs = 2 * 3600 * 1000;
+
+        visibleQuakes.forEach(e => {
           if (e.magnitude < magThreshold) return;
           if (depthFilter === "shallow" && e.depth_km >= 70) return;
           if (depthFilter === "intermediate" && (e.depth_km < 70 || e.depth_km >= 300)) return;
@@ -2215,23 +2446,30 @@
 
           const color = getMagColor(e.magnitude);
           const radius = Math.max(4, Math.min(18, (e.magnitude - 3.0) * 3.5));
+          const isRecent = (now - e.time_ms) <= twoHoursMs;
 
           const marker = L.circleMarker([e.latitude, e.longitude], {
+            renderer: canvasRenderer || undefined,
             radius: radius,
             fillColor: color,
-            color: "#ffffff",
-            weight: 1,
-            opacity: 0.9,
+            color: isRecent ? "#38bdf8" : "#ffffff",
+            weight: isRecent ? 2.5 : 1,
+            opacity: 0.95,
             fillOpacity: 0.8
           });
+
+          const energyJ = e.energy_joules || Math.pow(10, 4.8 + 1.5 * e.magnitude);
+          const tntTons = e.energy_tnt_tons || (energyJ / 4.184e9);
+          const depthTier = e.depth_tier || (e.depth_km < 70 ? "Shallow" : (e.depth_km < 300 ? "Intermediate" : "Deep"));
 
           const popupContent = `
             <div class="popup-box">
               <span class="popup-mag" style="background: ${color}; color: #fff;">M ${e.magnitude.toFixed(1)}</span>
               <div class="popup-title">${escapeHtml(e.place)}</div>
               <div class="popup-row"><span>Time:</span> <strong>${formatTimestamp(e.time_ms)}</strong></div>
-              <div class="popup-row"><span>Depth:</span> <strong>${e.depth_km} km</strong></div>
+              <div class="popup-row"><span>Depth:</span> <strong>${e.depth_km} km (${depthTier})</strong></div>
               <div class="popup-row"><span>Coords:</span> <strong>${e.latitude}, ${e.longitude}</strong></div>
+              <div class="popup-row"><span>Radiated Energy:</span> <strong>${tntTons >= 1e6 ? (tntTons/1e6).toFixed(2) + ' Mt' : Math.round(tntTons).toLocaleString()} TNT</strong></div>
               ${e.url ? `<a href="${escapeHtml(e.url)}" target="_blank" rel="noopener noreferrer" class="popup-btn">Open Official USGS Page &rarr;</a>` : ""}
             </div>
           `;
@@ -2255,13 +2493,16 @@
       function renderAnalyticsCharts() {
         if (typeof Plotly === "undefined") return;
 
+        const isLight = document.body.classList.contains("light-theme");
+        const chartTextColor = isLight ? "#475569" : "#94a3b8";
+        const chartGridColor = isLight ? "rgba(0,0,0,0.08)" : "rgba(255,255,255,0.06)";
         const darkLayout = {
           paper_bgcolor: "transparent",
           plot_bgcolor: "transparent",
-          font: { color: "#94a3b8", family: "sans-serif", size: 11 },
+          font: { color: chartTextColor, family: "sans-serif", size: 11 },
           margin: { l: 45, r: 20, t: 30, b: 40 },
-          xaxis: { gridcolor: "rgba(255,255,255,0.06)", zerolinecolor: "rgba(255,255,255,0.1)" },
-          yaxis: { gridcolor: "rgba(255,255,255,0.06)", zerolinecolor: "rgba(255,255,255,0.1)" }
+          xaxis: { gridcolor: chartGridColor, zerolinecolor: chartGridColor },
+          yaxis: { gridcolor: chartGridColor, zerolinecolor: chartGridColor }
         };
 
         // 1. Magnitude Distribution

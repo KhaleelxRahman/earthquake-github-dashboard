@@ -160,15 +160,21 @@ def run_pipeline(
         usgs_status = "offline_cache"
         github_status = "offline_cache"
     else:
-        # Ingest USGS
+        # Ingest USGS with EMSC secondary fallback
         raw_usgs, usgs_err = quake_service.fetch_earthquakes_raw(feed_key)
         if raw_usgs and usgs_err == "OK":
             earthquakes = quake_service.parse_earthquake_features(raw_usgs)
         else:
-            logger.warning("USGS live fetch failed (%s); falling back to cached baseline.", usgs_err)
-            cached_eq, _, _ = load_cached_data()
-            earthquakes = cached_eq
-            usgs_status = f"fallback ({usgs_err})"
+            logger.warning("USGS live fetch failed (%s); attempting EMSC secondary fallback.", usgs_err)
+            raw_emsc, emsc_err = quake_service.fetch_emsc_earthquakes_raw()
+            if raw_emsc and emsc_err == "OK":
+                earthquakes = quake_service.parse_emsc_features(raw_emsc)
+                usgs_status = "live_emsc_fallback"
+            else:
+                logger.warning("EMSC fallback also failed (%s); falling back to cached baseline.", emsc_err)
+                cached_eq, _, _ = load_cached_data()
+                earthquakes = cached_eq
+                usgs_status = f"fallback ({usgs_err})"
 
         # Ingest GitHub
         raw_github, github_err = quake_service.fetch_top_repositories_raw(token)

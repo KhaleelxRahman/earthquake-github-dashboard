@@ -8,9 +8,10 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 TEMPLATE_PATH = Path(__file__).parent / "templates" / "dashboard.html"
+TECTONIC_FILE = Path(__file__).parent / "data" / "tectonic_plates.geojson"
 
 
 def generate_dashboard_html(
@@ -26,12 +27,20 @@ def generate_dashboard_html(
 
     template_content = TEMPLATE_PATH.read_text(encoding="utf-8")
 
+    tectonic_data = None
+    if TECTONIC_FILE.exists():
+        try:
+            tectonic_data = json.loads(TECTONIC_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+
     initial_payload = {
         "earthquakes": earthquakes,
         "repositories": repositories,
         "analytics": analytics,
         "freshness": freshness,
         "config": config or {"googleMapsApiKey": ""},
+        "tectonicPlates": tectonic_data,
     }
     payload_json = json.dumps(initial_payload, ensure_ascii=False)
 

@@ -16,6 +16,8 @@ from urllib.parse import urlparse
 
 import requests
 
+import seismology
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -30,6 +32,7 @@ USGS_FEEDS: Dict[str, str] = {
     "4.5_month": "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/4.5_month.geojson",
 }
 
+EMSC_FEED_URL = "https://www.seismicportal.eu/fdsnws/event/1/query?format=json&limit=100&minmag=4.5"
 GITHUB_SEARCH_URL = "https://api.github.com/search/repositories"
 DEFAULT_TIMEOUT_SECONDS = 15
 MAX_RETRIES = 3
@@ -289,6 +292,11 @@ def parse_earthquake_features(data: dict) -> List[Dict[str, Any]]:
 
         s_net = sanitize_text(raw_net, default="us").lower()
 
+        # Scientific seismological metrics
+        energy_j = round(seismology.calculate_energy_joules(f_mag), 2)
+        energy_tnt = round(seismology.calculate_energy_tnt_tons(f_mag), 4)
+        depth_tier = seismology.classify_depth(f_depth)
+
         record = {
             "id": feat_id or f"quake-{f_lat}-{f_lon}-{timestamp_ms}",
             "place": place,
@@ -298,6 +306,9 @@ def parse_earthquake_features(data: dict) -> List[Dict[str, Any]]:
             "latitude": f_lat,
             "longitude": f_lon,
             "depth_km": f_depth,
+            "depth_tier": depth_tier,
+            "energy_joules": energy_j,
+            "energy_tnt_tons": energy_tnt,
             "url": url,
             "felt": int(felt) if felt is not None and isinstance(felt, (int, float)) and felt >= 0 else None,
             "tsunami": int(tsunami) if tsunami in (0, 1) else 0,
@@ -317,6 +328,109 @@ def parse_earthquake_features(data: dict) -> List[Dict[str, Any]]:
     # Sort descending by event time
     valid_records.sort(key=lambda r: r["time_ms"], reverse=True)
     logger.info("Parsed %d valid earthquake records from USGS feed.", len(valid_records))
+    return valid_records
+
+
+def fetch_emsc_earthquakes_raw() -> Tuple[Optional[dict], str]:
+    """Fetch raw GeoJSON payload from EMSC (European-Mediterranean Seismological Centre) as secondary fallback."""
+    logger.info("Attempting secondary fallback fetch from EMSC GeoJSON feed: %s", EMSC_FEED_URL)
+    response = request_with_retry(EMSC_FEED_URL, timeout=12)
+    if response is None:
+        return None, "Network failure or timeout contacting EMSC API"
+    if response.status_code != 200:
+        return None, f"EMSC API returned HTTP status {response.status_code}"
+    try:
+        data = response.json()
+    except ValueError as exc:
+        return None, f"Invalid JSON received from EMSC: {exc}"
+    if not isinstance(data, dict):
+        return None, "EMSC payload is not a JSON object"
+    return data, "OK"
+
+
+def parse_emsc_features(data: dict) -> List[Dict[str, Any]]:
+    """Parse and normalize EMSC GeoJSON features into standard QuakeScope format."""
+    if not isinstance(data, dict):
+        return []
+    features = data.get("features", [])
+    if not isinstance(features, list):
+        return []
+
+    valid_records: List[Dict[str, Any]] = []
+    seen_ids: set[str] = set()
+
+    for feature in features:
+        if not isinstance(feature, dict):
+            continue
+        feat_id = feature.get("id") or ""
+        if feat_id and feat_id in seen_ids:
+            continue
+
+        props = feature.get("properties", {})
+        geom = feature.get("geometry", {})
+        coords = geom.get("coordinates", [])
+        if len(coords) < 3:
+            continue
+
+        lon, lat, depth = coords[0], coords[1], coords[2]
+        c_ok, f_lat, f_lon, f_depth, _ = validate_coordinates(lat, lon, depth)
+        if not c_ok:
+            continue
+
+        mag = props.get("mag")
+        m_ok, f_mag, _ = validate_magnitude(mag)
+        if not m_ok:
+            continue
+
+        raw_time = props.get("time")
+        try:
+            if isinstance(raw_time, str):
+                dt = datetime.fromisoformat(raw_time.replace("Z", "+00:00"))
+                timestamp_ms = int(dt.timestamp() * 1000)
+                iso_time = dt.isoformat()
+            else:
+                timestamp_ms = int(raw_time)
+                dt = datetime.fromtimestamp(timestamp_ms / 1000.0, tz=timezone.utc)
+                iso_time = dt.isoformat()
+        except Exception:
+            continue
+
+        place = sanitize_text(props.get("flynn_region") or props.get("place"), default="Unknown location")
+        url = sanitize_url(props.get("url"))
+
+        energy_j = round(seismology.calculate_energy_joules(f_mag), 2)
+        energy_tnt = round(seismology.calculate_energy_tnt_tons(f_mag), 4)
+        depth_tier = seismology.classify_depth(f_depth)
+
+        record = {
+            "id": feat_id or f"emsc-{f_lat}-{f_lon}-{timestamp_ms}",
+            "place": place,
+            "magnitude": f_mag,
+            "time_ms": timestamp_ms,
+            "time_iso": iso_time,
+            "latitude": f_lat,
+            "longitude": f_lon,
+            "depth_km": f_depth,
+            "depth_tier": depth_tier,
+            "energy_joules": energy_j,
+            "energy_tnt_tons": energy_tnt,
+            "url": url,
+            "felt": None,
+            "tsunami": 0,
+            "significance": None,
+            "status": "reviewed",
+            "mag_type": sanitize_text(props.get("magtype"), default="").lower(),
+            "mmi": None,
+            "alert": None,
+            "cdi": None,
+            "net": "emsc",
+        }
+        if feat_id:
+            seen_ids.add(feat_id)
+        valid_records.append(record)
+
+    valid_records.sort(key=lambda r: r["time_ms"], reverse=True)
+    logger.info("Parsed %d valid earthquake records from EMSC fallback feed.", len(valid_records))
     return valid_records
 
 
@@ -492,6 +606,12 @@ def calculate_analytics(earthquakes: List[Dict[str, Any]]) -> Dict[str, Any]:
     if region_counts:
         most_active_region = max(region_counts.items(), key=lambda item: item[1])[0]
 
+    # Scientific Seismology calculations
+    tot_joules, tot_tnt = seismology.calculate_cumulative_energy(magnitudes)
+    b_val, b_err, b_n = seismology.calculate_b_value(magnitudes, min_magnitude=min(magnitudes) if magnitudes else 4.5)
+    clusters = seismology.detect_aftershock_clusters(earthquakes)
+    total_aftershocks = sum(len(v) for v in clusters.values())
+
     return {
         "total_count": total,
         "max_magnitude": max_mag,
@@ -507,6 +627,13 @@ def calculate_analytics(earthquakes: List[Dict[str, Any]]) -> Dict[str, Any]:
         "magnitude_bins": mag_bins,
         "depth_bins": depth_bins,
         "hourly_distribution": hourly_dist,
+        "total_energy_joules": round(tot_joules, 2),
+        "total_energy_tnt_tons": round(tot_tnt, 2),
+        "b_value": b_val,
+        "b_value_std_err": b_err,
+        "b_value_sample_size": b_n,
+        "aftershock_clusters_count": len(clusters),
+        "aftershocks_detected": total_aftershocks,
         "latest_event_iso": earthquakes[0]["time_iso"] if earthquakes else None,
         "oldest_event_iso": earthquakes[-1]["time_iso"] if earthquakes else None,
     }

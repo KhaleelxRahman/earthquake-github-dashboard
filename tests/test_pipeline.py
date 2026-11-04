@@ -87,10 +87,12 @@ class TestPipelineReliability(unittest.TestCase):
 
     @patch("data_pipeline.load_cached_data")
     @patch("quake_service.fetch_earthquakes_raw")
+    @patch("quake_service.fetch_emsc_earthquakes_raw")
     @patch("quake_service.fetch_top_repositories_raw")
-    def test_empty_pipeline_fails_safely(self, mock_repos, mock_quakes, mock_cache):
+    def test_empty_pipeline_fails_safely(self, mock_repos, mock_emsc, mock_quakes, mock_cache):
         # Everything returns empty / failure
         mock_quakes.return_value = (None, "Network failure")
+        mock_emsc.return_value = (None, "Network failure")
         mock_repos.return_value = (None, "Rate limit")
         mock_cache.return_value = ([], [], {})
 

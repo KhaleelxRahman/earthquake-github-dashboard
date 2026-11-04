@@ -19,8 +19,16 @@ Explore the hosted application on GitHub Pages:
 
 ### What It Does
 * **Dual-Provider Interactive Geospatial Visualization**: Global vector map with an instant in-app provider switcher:
-  * **🌐 Leaflet.js (Default)**: Fully featured, zero-key, zero-cost CartoDB Dark Matter, OpenStreetMap, and Esri Satellite basemaps.
+  * **🌐 Leaflet.js (Default)**: Hardware-accelerated HTML5 Canvas marker renderer (`L.canvas()`) with CartoDB Dark Matter, OpenStreetMap, and Esri Satellite basemaps. Zero keys needed.
   * **🗺️ Google Maps**: Official Google Maps JavaScript API with customized dark theme, magnitude circle scaling, interactive InfoWindows, and smooth controls.
+* **Tectonic Plate Boundary Overlays**: Bundled Peter Bird (2003) global plate boundary and fault line vector layer (*PB2002*), with toggleable visibility and boundary classifications.
+* **Empirical Seismology & Physics Engine (Exploratory / Non-Predictive)**:
+  * **Gutenberg-Richter Law & Aki's (1965) MLE**: Computes dynamic $b$-value slope and standard error ($\sigma_b$) directly from observed magnitude distributions. Documents completeness threshold ($M_c$), binning ($\Delta M = 0.1$), and sample size ($N \ge 15$). Descriptive/exploratory only; strictly not an earthquake prediction or rupture forecast.
+  * **Seismic Radiated Energy Formulation**: Real-time energy computation via Gutenberg-Richter (1956) formulation ($E = 10^{4.8 + 1.5M}$ Joules) with metric ton TNT equivalencies.
+  * **IASPEI Depth Stratification**: Color and filter classification into Shallow (<70 km), Intermediate (70–300 km), and Deep (≥300 km) events.
+* **Chronological Time Scrubber & Playback**: Interactive timeline scrubber and automated play/pause animation allowing sequential review of seismic event propagation.
+* **Scientific Dark / Paper Light Mode**: Toggleable accessible theme switcher supporting high-contrast daylight field research and dark laboratory environments.
+* **Multi-Source Ingestion with EMSC Fallback**: Automated primary ingestion from USGS GeoJSON with live secondary fallback to EMSC (European-Mediterranean Seismological Centre) and verified cached baselines.
 * **Magnitude-Scaled & Colored Telemetry**: Visualizes earthquakes with magnitude-scaled markers and color indicators (Minor, Moderate, Strong, Major) with pulse animations for significant events.
 * **Dual-Layer Ingestion**: Combines pre-rendered build snapshots for zero-latency initial page loads with direct client-side browser polling to the USGS CORS endpoints.
 * **Advanced Analytics**: Interactive Plotly distributions for earthquake magnitude, focal depth, UTC hourly frequency, and regional activity rankings.
@@ -129,7 +137,7 @@ Open `index.html` in your web browser to explore the dashboard locally.
 
 ## Running the Automated Test Suite
 
-QuakeScope includes 25 comprehensive unit and integration tests that run completely offline:
+QuakeScope includes 39 comprehensive unit and integration tests that run completely offline:
 
 ```bash
 # Run tests with Python's built-in test runner
